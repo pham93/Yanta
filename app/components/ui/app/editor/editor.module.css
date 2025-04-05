@@ -1,0 +1,6 @@
+/* Base theme */
+.editor[data-editor-theme][data-color-scheme] {
+  .bn-button {
+    background-color: green !important;
+  }
+}
