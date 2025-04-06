@@ -38,10 +38,9 @@ export default function Editor() {
   return (
     <>
       <BlockNoteView
-        className={`editor ${style.editor} mx-40`}
+        className={`editor ${style.editor} pb-24`}
         editor={editor}
         data-editor-theme="one"
-        shadCNComponents={{ Button, Input, Toggle }}
         onChange={() => {
           // Saves the document JSON to state.
           setBlocks(editor.document);

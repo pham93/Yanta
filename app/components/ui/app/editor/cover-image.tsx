@@ -9,6 +9,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
+import { Img } from "~/components/ui/image";
 
 const CoverImage = () => {
   const [coverImage, setCoverImage] = useState<string | null>(
@@ -33,13 +34,13 @@ const CoverImage = () => {
   return (
     <div className="relative mb-10">
       {coverImage ? (
-        <img
+        <Img
           src={coverImage}
           alt="Cover"
           className="w-full h-48 object-cover"
         />
       ) : (
-        <div className="w-full h-[4rem]">No Cover Image</div>
+        <div className="w-full h-[4rem]" />
       )}
       <Popover>
         <PopoverTrigger asChild>
@@ -54,15 +55,18 @@ const CoverImage = () => {
         <PopoverContent className="min-w-[36rem] z-[9999] flex justify-center flex-col p-2">
           <Tabs defaultValue="gallery">
             <div className="header border-b-slate-200 justify-between flex">
-              <TabsList className="grid w-[60%] grid-cols-3 bg-transparent p-0">
-                <TabsTrigger value="gallery" className="text-xs">
+              <TabsList className="grid w-[50%] grid-cols-4 bg-transparent p-0 text-left">
+                <TabsTrigger value="gallery" className="text-xs justify-start">
                   Gallery
                 </TabsTrigger>
-                <TabsTrigger value="upload" className="text-xs">
+                <TabsTrigger value="upload" className="text-xs justify-start">
                   Upload
                 </TabsTrigger>
-                <TabsTrigger value="link" className="text-xs">
+                <TabsTrigger value="link" className="text-xs justify-start">
                   Link
+                </TabsTrigger>
+                <TabsTrigger value="AI" className="text-xs justify-start">
+                  AI
                 </TabsTrigger>
               </TabsList>
               <Button
@@ -93,7 +97,7 @@ const CoverImage = () => {
                         "hover:ring-2 hover:ring-accent-foreground"
                       )}
                     >
-                      <img
+                      <Img
                         src="https://cdn.leonardo.ai/users/0ec727fb-b208-4674-8b2a-2a71a7c8ad3f/generations/a5f3ffee-6c93-4a2c-84ce-4e078a42fd7f/variations/UniversalUpscaler_a5f3ffee-6c93-4a2c-84ce-4e078a42fd7f.jpg"
                         alt="example"
                         key={idx}

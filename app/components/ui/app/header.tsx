@@ -17,6 +17,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Home, Edit, MessageSquare, Star, MoreVertical } from "lucide-react";
 import { SidebarTrigger } from "../sidebar";
+import usePersistenceStore from "~/hooks/use-persistence-store";
 
 export default function Header() {
   // State for editable breadcrumb items
@@ -39,10 +40,13 @@ export default function Header() {
   // const handleNameChange = (field, value) => {
   //   setNames((prev) => ({ ...prev, [field]: value }));
   // };
+  const setSidebarExpanded = usePersistenceStore(
+    (state) => state.setSidebarExpanded
+  );
 
   return (
     <header className="flex items-center px-2 py-1 border-b w-full">
-      <SidebarTrigger className="mr-2" />
+      <SidebarTrigger className="mr-2" onClick={() => setSidebarExpanded()} />
       {/* Left Side - Breadcrumb */}
       <div className="flex items-center gap-4">
         <Breadcrumb>
@@ -51,56 +55,27 @@ export default function Header() {
             <BreadcrumbItem>
               <div className="flex items-center gap-2">
                 <Home className="h-4 w-4" />
-                {isEditing.workspace ? (
-                  <div className="flex items-center gap-2">
-                    <Input value={names.workspace} className="h-8 w-32" />
-                    <Button size="sm" variant="ghost">
-                      Save
-                    </Button>
-                  </div>
-                ) : (
-                  <BreadcrumbLink href="#" className="flex items-center gap-2">
-                    {names.workspace}
-                    <Edit className="h-3 w-3 opacity-50" />
-                  </BreadcrumbLink>
-                )}
+                <BreadcrumbLink href="#" className="flex items-center gap-2">
+                  {names.workspace}
+                </BreadcrumbLink>
               </div>
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator>/</BreadcrumbSeparator>
 
             {/* Page */}
             <BreadcrumbItem>
-              {isEditing.page ? (
-                <div className="flex items-center gap-2">
-                  <Input value={names.page} className="h-8 w-32" />
-                  <Button size="sm" variant="ghost">
-                    Save
-                  </Button>
-                </div>
-              ) : (
-                <BreadcrumbLink href="#" className="flex items-center gap-2">
-                  {names.page}
-                  <Edit className="h-3 w-3 opacity-50" />
-                </BreadcrumbLink>
-              )}
+              <BreadcrumbLink href="#" className="flex items-center gap-2">
+                <Edit className="h-4 w-4" />
+                {names.page}
+              </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator>/</BreadcrumbSeparator>
 
             {/* Nested Page */}
             <BreadcrumbItem>
-              {isEditing.nested ? (
-                <div className="flex items-center gap-2">
-                  <Input value={names.nested} className="h-8 w-32" />
-                  <Button size="sm" variant="ghost">
-                    Save
-                  </Button>
-                </div>
-              ) : (
-                <BreadcrumbPage className="flex items-center gap-2">
-                  {names.nested}
-                  <Edit className="h-3 w-3 opacity-50 cursor-pointer" />
-                </BreadcrumbPage>
-              )}
+              <BreadcrumbPage className="flex items-center gap-2">
+                {names.nested}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

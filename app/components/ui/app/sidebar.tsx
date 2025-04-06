@@ -43,7 +43,7 @@ export default function Sidebar(): JSX.Element {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
   return (
-    <SidebarComponent collapsible="offcanvas" className="h-screen">
+    <SidebarComponent collapsible="none" className="h-screen w-full">
       {/* Header */}
       <SidebarHeader className="border-b">
         <SidebarMenuItem className="flex">
