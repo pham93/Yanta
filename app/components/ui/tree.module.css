@@ -1,0 +1,39 @@
+.CollapsibleContent {
+  overflow: hidden;
+}
+.CollapsibleContent[data-state="open"] {
+  animation-name: slideDown;
+  animation-duration: var(--collapsible-speed, 300ms);
+}
+.CollapsibleContent[data-state="closed"] {
+  animation-name: slideUp;
+  animation-duration: var(--collapsible-speed, 300ms);
+}
+
+@keyframes slideDown {
+  0% {
+    height: 0;
+    opacity: 0;
+  }
+  75% {
+    height: var(--radix-collapsible-content-height);
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+
+  75% {
+    height: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}

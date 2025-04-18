@@ -9,7 +9,6 @@ const Img = React.forwardRef<HTMLImageElement, ImgProps>(
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
-      console.log("is running on the client side only");
       if (!src) return;
       const img = new Image();
       img.src = src;

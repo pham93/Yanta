@@ -6,22 +6,28 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../tooltip";
+import { TooltipContentProps, TooltipProps } from "@radix-ui/react-tooltip";
 
 type IconButtonProps = {
   tooltipContent: string;
+  tooltipContentProps?: TooltipContentProps;
+  tooltipProps?: TooltipProps;
 } & ButtonProps;
 
 const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ tooltipContent, children, ...props }, ref) => {
+  (
+    { tooltipContent, tooltipContentProps, tooltipProps, children, ...props },
+    ref
+  ) => {
     return (
-      <TooltipProvider delayDuration={250}>
-        <Tooltip>
+      <TooltipProvider>
+        <Tooltip delayDuration={250} {...tooltipProps}>
           <TooltipTrigger asChild>
             <Button size="icon" variant="ghost" {...props} ref={ref}>
               {children}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent {...tooltipContentProps}>
             <p>{tooltipContent}</p>
           </TooltipContent>
         </Tooltip>

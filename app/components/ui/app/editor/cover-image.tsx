@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "~/components/ui/button";
 import { LucideImage, LucideUpload } from "lucide-react";
 import {
@@ -10,35 +10,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
 import { Img } from "~/components/ui/image";
+import { useEditorStore } from "~/providers/editor.provider";
 
 const CoverImage = () => {
-  const [coverImage, setCoverImage] = useState<string | null>(
-    "https://cdn.leonardo.ai/users/0ec727fb-b208-4674-8b2a-2a71a7c8ad3f/generations/a5f3ffee-6c93-4a2c-84ce-4e078a42fd7f/variations/UniversalUpscaler_a5f3ffee-6c93-4a2c-84ce-4e078a42fd7f.jpg"
-  );
+  const cover = useEditorStore((state) => state.cover);
+  const updateEditor = useEditorStore((state) => state.update);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setCoverImage(reader.result as string);
+        updateEditor({ cover: reader.result as string });
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleRemoveCoverImage = () => {
-    setCoverImage(null);
+    updateEditor({ cover: undefined });
   };
 
   return (
-    <div className="relative mb-10">
-      {coverImage ? (
-        <Img
-          src={coverImage}
-          alt="Cover"
-          className="w-full h-48 object-cover"
-        />
+    <div className="relative">
+      {cover ? (
+        <Img src={cover} alt="Cover" className="w-full h-48 object-cover" />
       ) : (
         <div className="w-full h-[4rem]" />
       )}
@@ -88,9 +84,10 @@ const CoverImage = () => {
                       asChild
                       variant={"ghost"}
                       onClick={() =>
-                        setCoverImage(
-                          "https://cdn.leonardo.ai/users/0ec727fb-b208-4674-8b2a-2a71a7c8ad3f/generations/a5f3ffee-6c93-4a2c-84ce-4e078a42fd7f/variations/UniversalUpscaler_a5f3ffee-6c93-4a2c-84ce-4e078a42fd7f.jpg"
-                        )
+                        updateEditor({
+                          cover:
+                            "https://cdn.leonardo.ai/users/0ec727fb-b208-4674-8b2a-2a71a7c8ad3f/generations/a5f3ffee-6c93-4a2c-84ce-4e078a42fd7f/variations/UniversalUpscaler_a5f3ffee-6c93-4a2c-84ce-4e078a42fd7f.jpg",
+                        })
                       }
                       className={cn(
                         "w-36 h-20 rounded-sm bg-slate-400 object-cover cursor-pointer p-0",

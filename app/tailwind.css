@@ -8,6 +8,7 @@ body {
     color-scheme: dark;
   }
   overflow: hidden;
+  --rct-color-focustree-item-draggingover-bg: #1a4d77;
 }
 
 @layer base {
@@ -91,4 +92,9 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.rct-tree-item-title-container-dragging-over {
+  background-color: var(--rct-color-focustree-item-draggingover-bg);
+  color: var(--rct-color-focustree-item-draggingover-color);
 }

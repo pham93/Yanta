@@ -23,24 +23,30 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import IconButton from "./icon-button";
-import { Link } from "@remix-run/react";
+import { Link, LinkProps } from "@remix-run/react";
+import { WorkspaceView } from "./workspace-view";
 
 interface NavItemProps {
   icon: LucideIcon;
   label: string;
+  link: LinkProps["to"];
 }
 
-const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label }) => (
-  <SidebarMenuItem>
-    <SidebarMenuButton>
-      <Icon className="h-4 w-4 mr-2" />
-      <span>{label}</span>
-    </SidebarMenuButton>
-  </SidebarMenuItem>
-);
+function NavItem({ icon: Icon, label, link }: NavItemProps) {
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild>
+        <Link to={link}>
+          <Icon className="h-4 w-4 mr-2" />
+          <span>{label}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
 
-export default function Sidebar(): JSX.Element {
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+export default function Sidebar() {
+  const [isCollapsed] = useState<boolean>(false);
 
   return (
     <SidebarComponent collapsible="none" className="h-screen w-full">
@@ -76,43 +82,18 @@ export default function Sidebar(): JSX.Element {
         {/* Main Navigation */}
         <SidebarGroup>
           <SidebarMenu>
-            <NavItem icon={SearchIcon} label="Search" />
-            <NavItem icon={HomeIcon} label="Home" />
-            <NavItem icon={InboxIcon} label="Inbox" />
+            <NavItem icon={SearchIcon} label="Search" link="/home" />
+            <NavItem icon={HomeIcon} label="Home" link="/home" />
+            <NavItem icon={InboxIcon} label="Inbox" link="/home" />
           </SidebarMenu>
         </SidebarGroup>
-
+        <WorkspaceView />
         {/* Private Section */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <h3 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Private
-            </h3>
-          )}
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                {!isCollapsed && "Getting Started"}
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                {!isCollapsed && "Weekly To Do List"}
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                {!isCollapsed && "Monthly Budget"}
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-
         {/* Bottom Navigation */}
         <SidebarGroup className="mt-auto">
           <SidebarMenu>
-            <NavItem icon={SettingsIcon} label="Settings" />
-            <NavItem icon={TrashIcon} label="Trash" />
+            <NavItem icon={SettingsIcon} label="Settings" link="/home" />
+            <NavItem icon={TrashIcon} label="Trash" link="/home" />
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
