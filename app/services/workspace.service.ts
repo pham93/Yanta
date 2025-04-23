@@ -1,31 +1,42 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "~/db/db.server";
-import { pages, workspaces } from "~/db/schema";
-import { PagesTree, type Workspace } from "~/schemas/workspace.schema";
+import { workspaces } from "~/db/schema";
+import {
+  PagesTree,
+  WorkspaceUpdate,
+  type Workspace,
+} from "~/schemas/workspace.schema";
 import { createLogger } from "~/utils/logger";
 import { tryCatch } from "~/utils/tryCatch";
+import { getPagesByWorkspace } from "./page.service";
+import { ROOT_NODE } from "~/utils/tree-control";
 
 const logger = createLogger("Workspace Service");
 
 export async function getWorkspace(workspaceId: string) {
-  const retrieveWorkspace$ = db.query.workspaces
+  return db.query.workspaces
     .findFirst({
       where: and(
         eq(workspaces.userId, "John Doe"),
         eq(workspaces.id, workspaceId)
       ),
     })
-    .then((e) => e as Workspace);
+    .then((e) => e as Workspace | undefined);
+}
 
-  const retrievePages$ = db.query.pages.findMany({
-    where: eq(pages.workspaceId, workspaceId),
-  });
+export async function getWorkspaceWithPages(workspaceId: string) {
+  const retrieveWorkspace$ = getWorkspace(workspaceId);
+  const retrievePages$ = getPagesByWorkspace(workspaceId);
 
   const { result, error } = await tryCatch(
     Promise.all([retrievePages$, retrieveWorkspace$]).then(
       ([pages, workspace]) => {
+        if (!workspace) {
+          return workspace;
+        }
+
         const validPages: PagesTree = {
-          root: workspace.pages["root"] ?? { index: "root", data: "" },
+          root: workspace.pages["root"] ?? ROOT_NODE,
         };
         for (const page of pages) {
           if (workspace.pages[page.id]) {
@@ -34,28 +45,34 @@ export async function getWorkspace(workspaceId: string) {
           }
         }
         workspace.pages = validPages;
+        console.log(validPages);
         return workspace;
       }
     )
   );
   if (error) {
     logger.error(error);
+  } else if (!result) {
+    logger.error(
+      "There is no workspace with such name. Returning empty workspace"
+    );
   } else {
-    logger.debug({ name: result.name }, "Successfully retrieved workspace");
+    logger.debug(
+      { workspace: result.name },
+      "Successfully retreived workspace"
+    );
   }
 
   return { result, error };
 }
 
-export async function updateWorkspacePages(pages: string, workspaceId: string) {
+export async function updateWorkspace(workspace: WorkspaceUpdate) {
   await db
     .update(workspaces)
-    .set({
-      pages,
-    })
-    .where(eq(workspaces.id, workspaceId));
-
+    .set(workspace)
+    .where(eq(workspaces.id, workspace.id));
+  logger.debug({ workspace: workspace.id }, "Successfully updated workspace");
   return true;
 }
 
-export type GetWorkspaceReturn = ReturnType<typeof getWorkspace>;
+export type GetWorkspaceReturn = ReturnType<typeof getWorkspaceWithPages>;

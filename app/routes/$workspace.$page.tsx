@@ -1,7 +1,9 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useNavigation } from "@remix-run/react";
+import React, { useEffect, useState } from "react";
 import { Editor } from "~/components/ui/app/editor/editor";
 import { Skeleton } from "~/components/ui/skeleton";
+import { cn } from "~/lib/utils";
 import { EditorProvider } from "~/providers/editor.provider";
 import { getPage } from "~/services/page.service";
 import { createLogger } from "~/utils/logger";
@@ -33,9 +35,33 @@ export function ErrorBoundary() {
   return <h1>No!</h1>;
 }
 
-const EditorSkeleton = () => {
+const EditorSkeleton = ({ children }: React.PropsWithChildren) => {
+  const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let timeout = -1;
+    if (navigation.state === "loading") {
+      timeout = window.setTimeout(() => setLoading(true), 200);
+    } else {
+      setLoading(false);
+    }
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [navigation]);
+
+  if (!loading) {
+    return <>{children}</>;
+  }
+
   return (
-    <div className="flex gap-5 w-full flex-col justify-center delay-300 animate-[opacity]">
+    <div
+      className={cn(
+        "mt-4 flex gap-5 w-full flex-col justify-center opacity-20 px-2"
+      )}
+    >
       <Skeleton className="h-60 rounded-none" />
       <Skeleton className="h-20 mx-20 rounded-none" />
       <Skeleton className="h-60 mx-20 rounded-none" />
@@ -45,15 +71,12 @@ const EditorSkeleton = () => {
 
 export default function WorkspacePage() {
   const { data } = useLoaderData<typeof loader>();
-  const navigation = useNavigation();
 
   return (
     <EditorProvider initialValue={data}>
-      {navigation.state === "loading" ? (
-        <EditorSkeleton />
-      ) : (
+      <EditorSkeleton>
         <Editor className="transition-[display] duration-200 delay-200 " />
-      )}
+      </EditorSkeleton>
     </EditorProvider>
   );
 }

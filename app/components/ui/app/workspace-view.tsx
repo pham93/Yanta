@@ -1,25 +1,39 @@
-import { SidebarGroup, SidebarMenu, SidebarMenuItem } from "../sidebar";
+import {
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "../sidebar";
 import AddNewPageDialog from "./new-page-dialog";
 import { ContextMenu, ContextMenuTrigger } from "../context-menu";
-import { Link, useFetcher, useParams } from "@remix-run/react";
+import { Link, useFetcher } from "@remix-run/react";
 import { DropdownMenu, DropdownMenuTrigger } from "../dropdown-menu";
 import { Button } from "../button";
 import { MoreVertical } from "lucide-react";
 import SettingsMenu from "./settings-menu";
 import { ControlledTreeEnvironment, Tree } from "../tree";
-import { PageTreeItem } from "~/schemas/workspace.schema";
 import { TreeItem, TreeItemIndex } from "react-complex-tree";
 import { useWorkspaceStore } from "~/store/workspaces.store";
 import { Skeleton } from "../skeleton";
 
 export function WorkspaceView() {
-  const updatedPageTreeItem = useWorkspaceStore((state) => state.updatePage);
+  const updatePage = useWorkspaceStore((state) => state.updatePage);
   const fetcher = useFetcher();
-  const { workspace: workspaceId } = useParams();
+
   const workspace = useWorkspaceStore((state) => state.workspace);
+
   const isLoading = useWorkspaceStore((state) => state.isLoading);
 
-  if (!workspace && isLoading) {
+  if (!workspace && !isLoading) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton>Create new workspace</SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
+  if (!workspace) {
     return (
       <div className="w-full px-2">
         <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
@@ -31,13 +45,9 @@ export function WorkspaceView() {
     );
   }
 
-  if (!workspace) {
-    return <></>;
-  }
-
-  const handleRename = (pageTreeItem: PageTreeItem, name: string) => {
+  const handleRename = (pageTreeItem: TreeItem<string>, name: string) => {
     pageTreeItem.data = name;
-    updatedPageTreeItem(pageTreeItem, fetcher);
+    updatePage({ id: pageTreeItem.index as string, title: name }, fetcher);
   };
 
   const handleOnTreeChange = (
@@ -48,7 +58,7 @@ export function WorkspaceView() {
         pages: JSON.stringify(newTree),
       },
       {
-        action: `/${workspaceId}`,
+        action: `/${workspace.id}`,
         method: "PUT",
         encType: "application/json",
       }
@@ -65,11 +75,11 @@ export function WorkspaceView() {
           </span>
         </SidebarMenuItem>
         <ControlledTreeEnvironment<string>
-          items={workspace?.pages}
+          items={workspace.pages}
           viewState={{}}
-          renderDepthOffset={15}
+          renderDepthOffset={10}
           className="mt-0"
-          getItemTitle={(item) => item.data}
+          getItemTitle={(item) => item.data ?? "New Title"}
           canDragAndDrop={true}
           onTreeOrderChange={handleOnTreeChange}
           onRenameItem={handleRename}
@@ -85,7 +95,6 @@ export function WorkspaceView() {
                   <span className="group flex items-center justify-between w-full">
                     <Link
                       className="text-left flex-shrink text-ellipsis"
-                      prefetch={"viewport"}
                       to={`/${workspace.id}/${item.index}`}
                     >
                       {title}

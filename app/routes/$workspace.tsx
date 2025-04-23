@@ -1,24 +1,18 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import {
-  ClientActionFunctionArgs,
-  Outlet,
-  useLoaderData,
-} from "@remix-run/react";
+import { Outlet, useLoaderData } from "@remix-run/react";
 import { useEffect } from "react";
-import { pageInsertSchema, pagesTreeSchema } from "~/schemas/workspace.schema";
-import { upsertPage } from "~/services/page.service";
+import { pagesTreeSchema } from "~/schemas/workspace.schema";
 import {
-  getWorkspace,
-  updateWorkspacePages,
+  getWorkspaceWithPages,
+  updateWorkspace,
 } from "~/services/workspace.service";
 import { useWorkspaceStore } from "~/store/workspaces.store";
 import { actionResponse } from "~/utils/actionResponse";
-import { tryCatch } from "~/utils/tryCatch";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { workspace: workspaceId } = params;
 
-  const getWorkspace$ = getWorkspace(workspaceId as string);
+  const getWorkspace$ = getWorkspaceWithPages(workspaceId as string);
 
   return actionResponse({
     data: {
@@ -27,34 +21,20 @@ export async function loader({ params }: LoaderFunctionArgs) {
   });
 }
 
-export async function action({ request, params }: ActionFunctionArgs) {
+export async function action({ params, request }: ActionFunctionArgs) {
   const { workspace: workspaceId } = params as { workspace: string };
-  const { pages, page: pageStr } = (await request.json()) as {
-    pages: string;
-    page: string;
-  };
-
-  pagesTreeSchema.parse(JSON.parse(pages));
-  const page = pageInsertSchema.parse(JSON.parse(pageStr));
 
   switch (request.method) {
     case "PUT": {
-      await updateWorkspacePages(pages, workspaceId);
-      await upsertPage({ ...page, workspaceId });
+      const { pages: pagesStr } = (await request.json()) as { pages: string };
+      const pages = pagesTreeSchema.parse(JSON.parse(pagesStr));
+      await updateWorkspace({ id: workspaceId, pages });
+      return true;
     }
   }
-  return true;
 }
 
-export async function clientAction({ serverAction }: ClientActionFunctionArgs) {
-  const { result, error } = await tryCatch(serverAction<typeof action>());
-  if (error) {
-    return { error: error.message };
-  }
-  return result;
-}
-
-export default function Page() {
+export default function Workspace() {
   const { data } = useLoaderData<typeof loader>();
   const setWorkspaceAsync = useWorkspaceStore(
     (state) => state.setWorkspaceAsync

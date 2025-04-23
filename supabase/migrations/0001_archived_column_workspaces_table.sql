@@ -1,0 +1,1 @@
+ALTER TABLE "yanta"."workspaces" ADD COLUMN "archived_pages" jsonb DEFAULT '{}'::jsonb NOT NULL;

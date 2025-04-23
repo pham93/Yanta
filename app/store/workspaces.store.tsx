@@ -2,12 +2,12 @@ import { create } from "zustand/react";
 import {
   Workspace,
   PageTreeItem,
-  PageTreeInsertItem,
-  PagesTree,
   PageInsert,
+  PageUpdate,
 } from "~/schemas/workspace.schema";
-import { FetcherWithComponents } from "@remix-run/react";
+import { Fetcher, FetcherWithComponents } from "@remix-run/react";
 import { GetWorkspaceReturn } from "~/services/workspace.service";
+import { workspaceTree } from "~/routes/$workspace.tree";
 
 export interface WorkspaceState {
   workspace?: Workspace;
@@ -18,16 +18,15 @@ interface WorkspacesAction {
   setWorkspace: (workspace: Workspace) => void;
 
   setWorkspaceAsync: (workspace$: GetWorkspaceReturn) => void;
-  updatePage: (
+  removePage: (
     page: PageTreeItem,
     fetcher?: FetcherWithComponents<unknown>
   ) => void;
-  submitWorkspace: (
-    pagesTree: PagesTree,
-    fetcher: FetcherWithComponents<unknown>
+  updatePage: (
+    page: PageUpdate,
+    fetcher?: FetcherWithComponents<unknown>
   ) => void;
-  addNewPage: (
-    pageTreeNode: PageTreeInsertItem,
+  addPage: (
     page: PageInsert,
     parent?: PageTreeItem,
     fetcher?: FetcherWithComponents<unknown>
@@ -36,80 +35,109 @@ interface WorkspacesAction {
 
 export type WorkspacesStore = WorkspacesAction & WorkspaceState;
 
+function submitWorkspace(
+  get: () => WorkspacesStore,
+  payload: Record<string, string>,
+  method: Fetcher["formMethod"],
+  fetcher: FetcherWithComponents<unknown>
+) {
+  const { workspace: activeWorkspace } = get();
+  if (!activeWorkspace) {
+    throw new Error("No active workspace");
+  }
+  fetcher.submit(payload, {
+    action: `/${activeWorkspace.id}/tree`,
+    method: method,
+    encType: "application/json",
+  });
+}
+
 export const useWorkspaceStore = create<WorkspacesStore>((set, get) => ({
-  isLoading: false,
+  isLoading: true,
+
+  setWorkspace(workspace) {
+    set({ workspace: workspace });
+  },
+
   async setWorkspaceAsync(promise) {
     set({ isLoading: true });
     const { result } = await promise;
     set({ workspace: result, isLoading: false });
   },
-  submitWorkspace(pagesTree, fetcher) {
+
+  removePage(pageTreeItem, fetcher) {
     const { workspace: activeWorkspace } = get();
     if (!activeWorkspace) {
-      throw new Error("No activew workspace");
+      throw new Error("No active workspace");
     }
-    fetcher.submit(
-      {
-        pages: JSON.stringify(pagesTree),
-      },
-      {
-        action: `/${activeWorkspace.id}/page1`,
-        method: "PUT",
-        encType: "application/json",
-      }
-    );
-  },
 
-  updatePage(updatedPageTreeItem, fetcher) {
-    const { workspace: activeWorkspace } = get();
-    if (!activeWorkspace) {
-      throw new Error("No activew workspace");
-    }
-    const pages = activeWorkspace.pages;
-    const idx = updatedPageTreeItem.index as string;
-    pages[idx] = { ...pages[idx], ...updatedPageTreeItem };
+    const newWorkspace = { ...activeWorkspace };
+    newWorkspace.pages[pageTreeItem.index].isLoading = true;
 
-    fetcher && this.submitWorkspace(pages, fetcher);
-
-    return { activeWorkspace: { ...activeWorkspace } };
-  },
-
-  addNewPage(pageTreeNode, page, parent, fetcher) {
-    const { workspace: activeWorkspace } = get();
-    if (!activeWorkspace) {
-      throw new Error("No activew workspace");
-    }
-    const pageId = pageTreeNode.index as string;
-    const pages = activeWorkspace.pages;
-    if (!parent) {
-      parent = pages["root"] as PageTreeItem;
-    }
-    const children = parent.children ?? [];
-
-    parent.children = [...children, pageId];
-    // add the new page to tree
-    pages[pageId] = { ...pageTreeNode };
-
-    const updatedWorkspace = { ...activeWorkspace, pages };
-    set({ workspace: updatedWorkspace });
+    set({ workspace: newWorkspace });
 
     if (fetcher) {
-      fetcher.submit(
+      submitWorkspace(
+        get,
         {
-          pages: JSON.stringify(pages),
-          page: JSON.stringify(page),
+          pageId: pageTreeItem.index,
         },
-        {
-          action: `/${activeWorkspace.id}`,
-          method: "PUT",
-          encType: "application/json",
-        }
+        "DELETE",
+        fetcher
       );
     }
-    return updatedWorkspace;
   },
 
-  setWorkspace(workspace) {
-    set({ workspace: workspace });
+  updatePage(page, fetcher) {
+    const { workspace: activeWorkspace } = get();
+    if (!activeWorkspace) {
+      throw new Error("No active workspace");
+    }
+
+    const updatedWorkspace = workspaceTree.updatePage(activeWorkspace, page);
+
+    updatedWorkspace.pages[page.id].isLoading = true;
+    set({ workspace: { ...updatedWorkspace } });
+
+    if (fetcher) {
+      submitWorkspace(
+        get,
+        {
+          page: JSON.stringify({ id: page.id, title: page.title }),
+        },
+        "PUT",
+        fetcher
+      );
+    }
+  },
+
+  addPage(page, parent, fetcher) {
+    const { workspace: activeWorkspace } = get();
+
+    if (!activeWorkspace || !page.id) {
+      throw new Error("No active workspace or page id is not provided");
+    }
+
+    const newWorkspace = workspaceTree.addPageOptimistic(
+      page,
+      activeWorkspace,
+      parent?.index
+    );
+    newWorkspace.pages[page.id].isLoading = true;
+
+    set({ workspace: newWorkspace });
+
+    if (fetcher) {
+      submitWorkspace(
+        get,
+        {
+          page: JSON.stringify(page),
+          parentId: parent?.index ?? "",
+        },
+        "POST",
+        fetcher
+      );
+    }
+    return activeWorkspace;
   },
 }));

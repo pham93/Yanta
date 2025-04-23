@@ -1,8 +1,10 @@
 import { create, StateCreator } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { EditorState } from "~/store/editor.store";
 
 interface PersistenceState {
   sidebarExpanded: boolean;
+  localChanges: Record<string, Partial<EditorState>>;
 }
 
 interface PersistenceActions {
@@ -13,6 +15,8 @@ type PersistenceStore = PersistenceState & PersistenceActions;
 
 const stateSlice: StateCreator<PersistenceStore> = (set) => ({
   sidebarExpanded: false,
+  localChanges: {},
+
   setSidebarExpanded() {
     set((state) => ({ sidebarExpanded: !state.sidebarExpanded }));
   },

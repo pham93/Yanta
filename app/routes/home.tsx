@@ -23,7 +23,7 @@ export default function Home() {
   return (
     <>
       {data?.map((e) => (
-        <Link key={e.id} to={`/${e.id}/gg`}>
+        <Link key={e.id} to={`/${e.id}`}>
           {e.name}
         </Link>
       ))}

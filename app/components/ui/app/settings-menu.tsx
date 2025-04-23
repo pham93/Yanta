@@ -6,6 +6,7 @@ import {
   LucideStar,
   Move,
   Trash,
+  Trash2,
 } from "lucide-react";
 import {
   menuComponents,
@@ -14,6 +15,9 @@ import {
   MenuType,
 } from "../menu-item";
 import { TreeItem, TreeItemRenderContext } from "react-complex-tree";
+import { useWorkspaceStore } from "~/store/workspaces.store";
+import { PageTreeItem } from "~/schemas/workspace.schema";
+import { useFetcher } from "@remix-run/react";
 
 export interface SettingMenuProps {
   type: MenuType;
@@ -32,8 +36,11 @@ const renderItem: MenuItemProps["renderItem"] = ({ item }) => (
   </li>
 );
 
-const SettingsMenu = ({ type, context }: SettingMenuProps) => {
+const SettingsMenu = ({ type, context, item }: SettingMenuProps) => {
   const Menu = menuComponents[type];
+  const fetcher = useFetcher();
+  const removePage = useWorkspaceStore((store) => store.removePage);
+
   const settingsItem = [
     {
       label: "Add to favorite",
@@ -58,6 +65,12 @@ const SettingsMenu = ({ type, context }: SettingMenuProps) => {
       type: "item",
       icon: <Edit />,
       onClick: () => context.startRenamingItem(),
+    },
+    {
+      label: "Remove",
+      type: "item",
+      icon: <Trash2 />,
+      onClick: () => removePage(item as PageTreeItem, fetcher),
     },
     {
       label: "Move to",

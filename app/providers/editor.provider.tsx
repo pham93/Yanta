@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useStore } from "zustand";
+import usePersistenceStore from "~/hooks/use-persistence-store";
 import {
   createEditorStore,
   EditorState,
@@ -24,7 +25,11 @@ export const EditorProvider = ({
   }
 
   useEffect(() => {
-    initialValue && storeRef.current?.setState(initialValue);
+    if (initialValue && initialValue.id) {
+      const id = initialValue.id;
+      const content = usePersistenceStore.getState().localChanges[id];
+      storeRef.current?.setState({ ...initialValue, ...content });
+    }
   }, [initialValue]);
 
   return (

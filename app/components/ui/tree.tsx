@@ -22,6 +22,13 @@ import {
 import style from "./tree.module.css";
 import { Input } from "./input";
 
+declare module "react-complex-tree" {
+  interface TreeItem<T> {
+    data: T;
+    isLoading?: boolean;
+  }
+}
+
 // Props for the Tree component, making key handlers required
 type TreeProps<T> = {
   animationSpeed?: number;
@@ -66,7 +73,8 @@ const RenderItem = <T = string,>({
         variant="ghost"
         role="menuitem"
         className={cn(
-          "w-full justify-start px-1 py-1 gap-1 focus-visible:ring-primary h-8 cursor-pointer"
+          "w-full justify-start px-1 py-1 gap-1 focus-visible:ring-primary h-8 cursor-pointer",
+          { "animate-pulse pointer-events-none": item.isLoading }
         )}
         {...context.itemContainerWithoutChildrenProps}
         {...context.interactiveElementProps}
@@ -103,7 +111,12 @@ const RenderItem = <T = string,>({
       {/* Nested children */}
       {item.children && item.children.length > 0 && (
         <CollapsibleContent
-          className={cn(style.CollapsibleContent, "p-[2px]")}
+          className={cn(
+            style.CollapsibleContent,
+            "p-[2px]",
+
+            { "animate-pulse pointer-events-none opacity-40": item.isLoading }
+          )}
           style={
             {
               "--collapsible-speed": `${animationSpeed}ms`,
@@ -168,7 +181,7 @@ const ControlledTreeEnvironment = <T = string,>({
   };
 
   return (
-    <XControlledTreeEnvironment<T>
+    <XControlledTreeEnvironment<T, string>
       onFocusItem={(item) => setFocusedItem(item.index)}
       onExpandItem={(item) => setExpandedItems([...expandedItems, item.index])}
       onDrop={handleDrop}

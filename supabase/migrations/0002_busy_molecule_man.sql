@@ -1,1 +1,0 @@
-ALTER TABLE "workspaces" ADD COLUMN "user_id" varchar NOT NULL;

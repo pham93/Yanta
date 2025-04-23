@@ -80,7 +80,7 @@ export default function App() {
         <ResizablePanel defaultSize={75} order={2}>
           <main className="w-full h-screen overflow-hidden flex flex-col">
             <Header />
-            <Outlet />;
+            <Outlet />
           </main>
         </ResizablePanel>
       </ResizablePanelGroup>
