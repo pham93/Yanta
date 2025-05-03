@@ -27,6 +27,7 @@ declare module "react-complex-tree" {
   interface TreeItem<T> {
     data: T;
     isLoading?: boolean;
+    parent?: TreeItem<T>;
   }
 }
 

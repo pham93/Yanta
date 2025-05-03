@@ -29,16 +29,51 @@ export function removeTreeItem(target: TreeItem<unknown>, tree: Tree<unknown>) {
 export function treeLoop(
   tree: Tree<unknown>,
   rootId: TreeItemIndex,
-  callback: (id: TreeItem<unknown>) => void
+  callback: (id: TreeItem<unknown>, parent?: TreeItem<unknown>) => void,
+  parent?: TreeItem<unknown>
 ) {
-  const parent = tree[rootId];
-  callback(parent);
-  if (!parent.children) {
+  const current = tree[rootId];
+  callback(current, parent);
+  if (!current.children) {
     return;
   }
-  for (const a of parent.children) {
-    treeLoop(tree, a, callback);
+  for (const a of current.children) {
+    treeLoop(tree, a, callback, parent);
   }
+}
+
+export function appendParentAttribute(
+  target: TreeItem<unknown>,
+  tree: Tree<unknown>
+) {
+  treeLoop(tree, "root", (item, parent) => {
+    item.parent = parent;
+  });
+}
+
+export function getParent(target: TreeItem<unknown>, tree: Tree<unknown>) {
+  const treeArr = Object.values(tree);
+  const parent = treeArr.find((e) =>
+    e.children?.some((idx) => idx === target.index)
+  );
+  return parent;
+}
+
+export function getAcestry(
+  target: TreeItem<unknown>,
+  tree: Tree<unknown>
+): TreeItemIndex[] {
+  if (target.index === "root") {
+    return [];
+  }
+  const parent = getParent(target, tree);
+  if (!parent) {
+    throw new Error(
+      "It shouldn't be like this. Your tree should always have a parent"
+    );
+  }
+
+  return [...getAcestry(parent, tree), target.index];
 }
 
 export function addTreeItem(

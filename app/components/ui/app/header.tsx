@@ -1,13 +1,11 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
-import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -15,31 +13,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Home, Edit, MessageSquare, Star, MoreVertical } from "lucide-react";
+import { Edit, MessageSquare, Star, MoreVertical } from "lucide-react";
 import { SidebarTrigger } from "../sidebar";
 import usePersistenceStore from "~/hooks/use-persistence-store";
+import { useWorkspaceStore } from "~/store/workspaces.store";
+import { getAcestry } from "~/utils/tree-control";
+import { Link, useParams } from "@remix-run/react";
+import { cn } from "~/lib/utils";
 
 export default function Header() {
   // State for editable breadcrumb items
-  const [isEditing, setIsEditing] = useState({
-    workspace: false,
-    page: false,
-    nested: false,
-  });
-  const [names, setNames] = useState({
-    workspace: "My workspace",
-    page: "My page",
-    nested: "My nested page",
-  });
+  const pages = useWorkspaceStore((state) => state.workspace?.pages);
+  const { page: pageId, workspace: workspaceId } = useParams();
 
-  // Handle edit toggle and save
-  // const toggleEdit = (field) => {
-  //   setIsEditing((prev) => ({ ...prev, [field]: !prev[field] }));
-  // };
+  const navigationCrumbs = useMemo(() => {
+    if (!pageId || !pages) {
+      return [];
+    }
 
-  // const handleNameChange = (field, value) => {
-  //   setNames((prev) => ({ ...prev, [field]: value }));
-  // };
+    return getAcestry({ index: pageId, data: "" }, pages);
+  }, [pages, pageId]);
+
   const setSidebarExpanded = usePersistenceStore(
     (state) => state.setSidebarExpanded
   );
@@ -47,39 +41,30 @@ export default function Header() {
   return (
     <header className="flex items-center px-2 py-1 border-b w-full">
       <SidebarTrigger className="mr-2" onClick={() => setSidebarExpanded()} />
-      {/* Left Side - Breadcrumb */}
-      <div className="flex items-center gap-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            {/* Workspace */}
-            <BreadcrumbItem>
-              <div className="flex items-center gap-2">
-                <Home className="h-4 w-4" />
-                <BreadcrumbLink href="#" className="flex items-center gap-2">
-                  {names.workspace}
-                </BreadcrumbLink>
-              </div>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>/</BreadcrumbSeparator>
+      <Breadcrumb>
+        <BreadcrumbList className="gap-0 sm:gap-0">
+          {pages &&
+            navigationCrumbs.map((nav, idx) => (
+              <span key={nav} className="flex flex-row">
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    href="#"
+                    className={cn({ "text-primary": nav === pageId })}
+                    asChild
+                  >
+                    <Link to={`${workspaceId}/${nav}`} prefetch="intent">
+                      {pages[nav].data as string}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
 
-            {/* Page */}
-            <BreadcrumbItem>
-              <BreadcrumbLink href="#" className="flex items-center gap-2">
-                <Edit className="h-4 w-4" />
-                {names.page}
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>/</BreadcrumbSeparator>
-
-            {/* Nested Page */}
-            <BreadcrumbItem>
-              <BreadcrumbPage className="flex items-center gap-2">
-                {names.nested}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+                {idx !== navigationCrumbs.length - 1 ? (
+                  <BreadcrumbSeparator className="mx-2">/</BreadcrumbSeparator>
+                ) : null}
+              </span>
+            ))}
+        </BreadcrumbList>
+      </Breadcrumb>
       <div className="flex flex-grow" />
 
       {/* Right Side - Actions */}
