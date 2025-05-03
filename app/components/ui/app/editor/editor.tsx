@@ -9,6 +9,7 @@ import { ClientOnly } from "remix-utils/client-only";
 import { cn } from "~/lib/utils";
 import { useEditorStore } from "~/providers/editor.provider";
 import { useWorkspaceStore } from "~/store/workspaces.store";
+import { useFetcher } from "@remix-run/react";
 
 export function EditorContent() {
   // Stores the document JSON.
@@ -60,13 +61,17 @@ const Title = () => {
   const updateEditor = useEditorStore((state) => state.update);
   const getEditorSnapshot = useEditorStore((state) => state.getState);
   const updatePage = useWorkspaceStore((state) => state.updatePage);
+  const fetcher = useFetcher();
 
-  const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleOnChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    f?: typeof fetcher
+  ) => {
     const editorSnapshot = getEditorSnapshot();
     updateEditor({ title: e.target.value });
-    // update the title on workspace tree if the page exist. This is optimistic, no update to backend
+    // update to the backend will be done after onBlur
     if (editorSnapshot.id) {
-      updatePage({ data: e.target.value, index: editorSnapshot.id }, {});
+      updatePage({ title: e.target.value, id: editorSnapshot.id }, f);
     }
   };
 
@@ -78,7 +83,8 @@ const Title = () => {
       contentEditable
       maxLength={100}
       placeholder="New Title"
-      onChange={handleOnChange}
+      onChange={(e) => handleOnChange(e)}
+      onBlur={(e) => handleOnChange(e, fetcher)}
       className={cn(
         "whitespace-pre-wrap break-words text-[3rem] font-semibold outline-none resize-none pl-12",
         "w-full bg-transparent py-6"

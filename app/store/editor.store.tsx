@@ -26,7 +26,11 @@ export const createEditorStore = (initialState: Partial<EditorState> = {}) =>
     update(state) {
       const { id } = get();
       const { localChanges } = usePersistenceStore.getState();
-      const page = { ...localChanges[id as string], ...state };
+      const page = {
+        ...localChanges[id as string],
+        ...state,
+        lastModified: new Date(),
+      };
 
       usePersistenceStore.setState({
         localChanges: {

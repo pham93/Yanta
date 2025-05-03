@@ -4,11 +4,12 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
+  DialogPortal,
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
 import IconButton from "./icon-button";
-import { Loader2, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { Editor } from "./editor/editor";
 import { useFetcher, useParams } from "@remix-run/react";
 import { useCallback, useMemo, useState } from "react";
@@ -17,7 +18,6 @@ import { v4 as uuid } from "uuid";
 import { useWorkspaceStore } from "~/store/workspaces.store";
 import { EditorProvider } from "~/providers/editor.provider";
 import { createEditorStore } from "~/store/editor.store";
-import { cn } from "~/lib/utils";
 import { TreeItem } from "react-complex-tree";
 import { clientAction } from "~/routes/$workspace.tree";
 
@@ -54,23 +54,25 @@ function AddNewPageDialog({ parent }: { parent?: TreeItem<string> }) {
           <PlusIcon className="w-4 h-4" />
         </IconButton>
       </DialogTrigger>
-      <DialogContent className="max-w-[60svw] max-h-[50svh] flex flex-col p-0">
-        <DialogHeader>
-          <DialogTitle className="pt-5 pl-5">Create new</DialogTitle>
-        </DialogHeader>
-        <EditorProvider store={store}>
-          <Editor />
-        </EditorProvider>
-        <DialogFooter className="p-3">
-          <Button
-            type="button"
-            variant={"secondary"}
-            onClick={() => handleClick()}
-          >
-            Add
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      <DialogPortal>
+        <DialogContent className="max-w-[60svw] max-h-[50svh] flex flex-col p-0">
+          <DialogHeader>
+            <DialogTitle className="pt-5 pl-5">Create new</DialogTitle>
+          </DialogHeader>
+          <EditorProvider store={store}>
+            <Editor />
+          </EditorProvider>
+          <DialogFooter className="p-3">
+            <Button
+              type="button"
+              variant={"secondary"}
+              onClick={() => handleClick()}
+            >
+              Add
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </DialogPortal>
     </Dialog>
   );
 }

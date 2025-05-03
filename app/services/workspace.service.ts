@@ -9,7 +9,7 @@ import {
 import { createLogger } from "~/utils/logger";
 import { tryCatch } from "~/utils/tryCatch";
 import { getPagesByWorkspace } from "./page.service";
-import { ROOT_NODE } from "~/utils/tree-control";
+import { createDefaultRoot } from "~/utils/tree-control";
 
 const logger = createLogger("Workspace Service");
 
@@ -36,7 +36,7 @@ export async function getWorkspaceWithPages(workspaceId: string) {
         }
 
         const validPages: PagesTree = {
-          root: workspace.pages["root"] ?? ROOT_NODE,
+          root: workspace.pages["root"] ?? createDefaultRoot(),
         };
         for (const page of pages) {
           if (workspace.pages[page.id]) {
@@ -45,7 +45,6 @@ export async function getWorkspaceWithPages(workspaceId: string) {
           }
         }
         workspace.pages = validPages;
-        console.log(validPages);
         return workspace;
       }
     )

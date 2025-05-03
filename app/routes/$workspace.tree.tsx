@@ -12,35 +12,36 @@ import {
   Workspace,
 } from "~/schemas/workspace.schema";
 import { archivePages, upsertPage } from "~/services/page.service";
+import { getWorkspace, updateWorkspace } from "~/services/workspace.service";
 import {
-  getWorkspace,
-  getWorkspaceWithPages,
-  updateWorkspace,
-} from "~/services/workspace.service";
-import { addTreeItem, removeTreeItem, ROOT_NODE } from "~/utils/tree-control";
+  addTreeItem,
+  createDefaultRoot,
+  removeTreeItem,
+} from "~/utils/tree-control";
 import { tryCatch } from "~/utils/tryCatch";
 
 function removePageOptimistic(
-  pageTreeItem: PageTreeItem,
+  target: PageTreeItem,
   activeWorkspace: Workspace
 ) {
   const { newTree: pages, removedItems } = removeTreeItem(
-    pageTreeItem,
+    target,
     activeWorkspace.pages
   );
 
-  const root = activeWorkspace.archivedPages["root"] ?? ROOT_NODE;
+  const root = activeWorkspace.archivedPages["root"] ?? createDefaultRoot();
   root.children = root.children ?? [];
-  root.children.push(pageTreeItem.index);
+  root.children.push(target.index);
+
+  activeWorkspace.archivedPages = {
+    ...activeWorkspace.archivedPages,
+    root,
+    ...removedItems,
+  };
 
   const updatedWorkspace = {
     ...activeWorkspace,
     pages: pages as PagesTree,
-    archivedPages: {
-      ...activeWorkspace.archivedPages,
-      root,
-      [pageTreeItem.index]: pageTreeItem,
-    },
   };
 
   return { updatedWorkspace, removedItems };
@@ -53,10 +54,6 @@ function addPageOptimistic(
 ) {
   const pages = workspace.pages;
 
-  console.log(workspace.pages);
-
-  const parent = parentId ? pages[parentId] : pages["root"] ?? ROOT_NODE;
-
   workspace.pages = addTreeItem(
     {
       data: page.title ?? "New Title",
@@ -67,7 +64,7 @@ function addPageOptimistic(
       isFolder: true,
     },
     pages,
-    parent
+    pages[parentId ?? ""]
   ) as PagesTree;
 
   return { ...workspace };
@@ -152,7 +149,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
       const pageTreeItem = result.pages[pageId];
       const { updatedWorkspace, removedItems } =
         workspaceTree.removePageOptimistic(pageTreeItem, result);
-      const ids = uniqueUuidArraySchema.parse(removedItems);
+      const ids = uniqueUuidArraySchema.parse(Object.keys(removedItems));
+
       await Promise.allSettled([
         archivePages(ids),
         updateWorkspace(updatedWorkspace),

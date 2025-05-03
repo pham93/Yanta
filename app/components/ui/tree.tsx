@@ -1,5 +1,5 @@
 // src/components/ui/tree.tsx
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ControlledTreeEnvironment as XControlledTreeEnvironment,
   Tree,
@@ -21,6 +21,7 @@ import {
 } from "./collapsible";
 import style from "./tree.module.css";
 import { Input } from "./input";
+import { merge } from "es-toolkit";
 
 declare module "react-complex-tree" {
   interface TreeItem<T> {
@@ -74,7 +75,7 @@ const RenderItem = <T = string,>({
         role="menuitem"
         className={cn(
           "w-full justify-start px-1 py-1 gap-1 focus-visible:ring-primary h-8 cursor-pointer",
-          { "animate-pulse pointer-events-none": item.isLoading }
+          { "animate-pulse pointer-events-none opacity-40": item.isLoading }
         )}
         {...context.itemContainerWithoutChildrenProps}
         {...context.interactiveElementProps}
@@ -138,6 +139,7 @@ const ControlledTreeEnvironment = <T = string,>({
 }: TreeProps<T>) => {
   const [focusedItem, setFocusedItem] = useState<TreeItemIndex>();
   const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([]);
+  const [selectedItems, setSelectedItems] = useState<TreeItemIndex[]>([]);
 
   const handleDrop = (items: TreeItem<T>[], target: DraggingPosition) => {
     const newTreeData = { ...props.items };
@@ -180,11 +182,27 @@ const ControlledTreeEnvironment = <T = string,>({
     props.onTreeOrderChange?.(newTreeData);
   };
 
+  const mergedViewState = useMemo(
+    () =>
+      merge(
+        {
+          ["tree-1"]: {
+            focusedItem,
+            expandedItems,
+            selectedItems,
+          },
+        },
+        viewState
+      ),
+    [viewState, focusedItem, expandedItems, selectedItems]
+  );
+
   return (
     <XControlledTreeEnvironment<T, string>
       onFocusItem={(item) => setFocusedItem(item.index)}
       onExpandItem={(item) => setExpandedItems([...expandedItems, item.index])}
       onDrop={handleDrop}
+      onSelectItems={(items) => setSelectedItems(items)}
       onCollapseItem={(item) =>
         setExpandedItems(
           expandedItems.filter(
@@ -192,14 +210,7 @@ const ControlledTreeEnvironment = <T = string,>({
           )
         )
       }
-      viewState={{
-        ["tree-1"]: {
-          focusedItem,
-          expandedItems,
-        },
-        ...viewState,
-      }}
-      {...props}
+      viewState={mergedViewState}
       ref={ref}
       renderItem={(itemProps) => (
         <RenderItem<T> {...itemProps} treeProps={{ ...props, viewState }} />
@@ -258,6 +269,7 @@ const ControlledTreeEnvironment = <T = string,>({
           </form>
         </>
       )}
+      {...props}
     />
   );
 };

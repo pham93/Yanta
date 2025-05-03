@@ -8,6 +8,8 @@ import {
 import { Fetcher, FetcherWithComponents } from "@remix-run/react";
 import { GetWorkspaceReturn } from "~/services/workspace.service";
 import { workspaceTree } from "~/routes/$workspace.tree";
+import { StateCreator } from "zustand";
+import { ArchiveAction } from "~/routes/$workspace.archive";
 
 export interface WorkspaceState {
   workspace?: Workspace;
@@ -31,6 +33,10 @@ interface WorkspacesAction {
     parent?: PageTreeItem,
     fetcher?: FetcherWithComponents<unknown>
   ) => Workspace;
+  archiveAction: (
+    action: ArchiveAction,
+    fetcher?: FetcherWithComponents<unknown>
+  ) => void;
 }
 
 export type WorkspacesStore = WorkspacesAction & WorkspaceState;
@@ -52,8 +58,36 @@ function submitWorkspace(
   });
 }
 
-export const useWorkspaceStore = create<WorkspacesStore>((set, get) => ({
+const stateSlice: StateCreator<WorkspacesStore> = (set, get) => ({
   isLoading: true,
+
+  archiveAction(action, fetcher) {
+    const { workspace: activeWorkspace } = get();
+    if (!activeWorkspace) {
+      throw new Error("No active workspace");
+    }
+    const { actionType, pageId, newParent } = action;
+
+    activeWorkspace.archivedPages[pageId].isLoading = true;
+    set({ workspace: { ...activeWorkspace } });
+
+    const payload: typeof action = {
+      actionType,
+      pageId,
+      newParent,
+    };
+
+    console.log(fetcher, payload);
+
+    fetcher?.submit(
+      { ...payload },
+      {
+        action: `/${activeWorkspace.id}/archive`,
+        method: "PUT",
+        encType: "application/json",
+      }
+    );
+  },
 
   setWorkspace(workspace) {
     set({ workspace: workspace });
@@ -96,7 +130,9 @@ export const useWorkspaceStore = create<WorkspacesStore>((set, get) => ({
 
     const updatedWorkspace = workspaceTree.updatePage(activeWorkspace, page);
 
-    updatedWorkspace.pages[page.id].isLoading = true;
+    updatedWorkspace.pages[page.id].isLoading = !!fetcher;
+    updatedWorkspace.pages[page.id].data = page.title!;
+
     set({ workspace: { ...updatedWorkspace } });
 
     if (fetcher) {
@@ -140,4 +176,12 @@ export const useWorkspaceStore = create<WorkspacesStore>((set, get) => ({
     }
     return activeWorkspace;
   },
-}));
+});
+
+// export const useWorkspaceStore = create<WorkspacesStore>()(
+//   persist(stateSlice, {
+//     name: "yanta-workspace",
+//     storage: createJSONStorage(() => localStorage),
+//   })
+// );
+export const useWorkspaceStore = create<WorkspacesStore>(stateSlice);

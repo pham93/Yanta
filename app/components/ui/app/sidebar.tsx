@@ -25,6 +25,7 @@ import { useState } from "react";
 import IconButton from "./icon-button";
 import { Link, LinkProps } from "@remix-run/react";
 import { WorkspaceView } from "./workspace-view";
+import { Trash } from "./trash";
 
 interface NavItemProps {
   icon: LucideIcon;
@@ -93,7 +94,7 @@ export default function Sidebar() {
         <SidebarGroup className="mt-auto">
           <SidebarMenu>
             <NavItem icon={SettingsIcon} label="Settings" link="/home" />
-            <NavItem icon={TrashIcon} label="Trash" link="/home" />
+            <Trash />
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

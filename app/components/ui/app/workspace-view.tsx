@@ -91,36 +91,36 @@ export function WorkspaceView() {
           renderItemTitle={({ title, item, context }) => {
             return (
               <ContextMenu>
-                <ContextMenuTrigger asChild>
-                  <span className="group flex items-center justify-between w-full">
+                <span className="group flex items-center justify-between w-full">
+                  <ContextMenuTrigger asChild>
                     <Link
-                      className="text-left flex-shrink text-ellipsis"
+                      className="text-left flex-shrink text-ellipsis flex-grow"
                       to={`/${workspace.id}/${item.index}`}
                     >
                       {title}
                     </Link>
-                    <span>
-                      <DropdownMenu key={title}>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="opacity-85 more-settings invisible group-hover:visible p-1"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">More options</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <SettingsMenu
-                          type="dropdown"
-                          item={item}
-                          context={context}
-                        />
-                      </DropdownMenu>
-                      <AddNewPageDialog parent={item} />
-                    </span>
+                  </ContextMenuTrigger>
+                  <span>
+                    <DropdownMenu key={title}>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="opacity-85 more-settings invisible group-hover:visible p-1"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                          <span className="sr-only">More options</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <SettingsMenu
+                        type="dropdown"
+                        item={item}
+                        context={context}
+                      />
+                    </DropdownMenu>
+                    <AddNewPageDialog parent={item} />
                   </span>
-                </ContextMenuTrigger>
+                </span>
                 <SettingsMenu type="context" context={context} item={item} />
               </ContextMenu>
             );

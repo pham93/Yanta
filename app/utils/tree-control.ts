@@ -2,28 +2,28 @@ import { TreeItem, TreeItemIndex } from "react-complex-tree";
 
 type Tree<T = unknown> = Record<TreeItemIndex, TreeItem<T>>;
 
-export function removeTreeItem(page: TreeItem<unknown>, tree: Tree<unknown>) {
+export function removeTreeItem(target: TreeItem<unknown>, tree: Tree<unknown>) {
   const newTree = { ...tree };
   const treeArr = Object.values(tree);
   const parent = treeArr.find((e) =>
-    e.children?.some((idx) => idx === page.index)
+    e.children?.some((idx) => idx === target.index)
   );
 
   if (!parent) {
-    return { newTree, removedItems: [page.index] };
+    return { newTree, removedItems: {} };
   }
 
-  parent.children = parent?.children?.filter((e) => e !== page.index);
+  // remove the target
+  parent.children = parent?.children?.filter((e) => e !== target.index);
 
-  const indexes: string[] = [];
-
-  treeLoop(newTree, page.index, ({ index }) => {
-    indexes.push(index as string);
+  // remove all the decesdants
+  const removedItems: Record<TreeItemIndex, TreeItem> = {};
+  treeLoop(newTree, target.index, (node) => {
+    delete newTree[node.index];
+    removedItems[node.index] = node;
   });
 
-  indexes.forEach((e) => delete newTree[e]);
-
-  return { newTree, removedItems: indexes };
+  return { newTree, removedItems };
 }
 
 export function treeLoop(
@@ -42,31 +42,34 @@ export function treeLoop(
 }
 
 export function addTreeItem(
-  page: TreeItem<unknown>,
+  target: TreeItem<unknown>,
   tree: Tree<unknown>,
   parent?: TreeItem<unknown>
 ) {
   // parent?
   if (!parent) {
     const treeArr = Object.values(tree);
-    parent = treeArr.find((e) => e.children?.some((idx) => idx === page.index));
+    parent =
+      treeArr.find((e) => e.children?.some((idx) => idx === target.index)) ??
+      tree["root"] ??
+      createDefaultRoot();
   }
 
-  // still no parent?
-  if (!parent) {
-    parent = tree["root"];
-  }
   const children = parent.children ?? [];
 
-  parent.children = [...children, page.index];
+  parent.children = [...children, target.index];
+
   // add the new page to tree
-  tree[page.index] = page;
+  tree[target.index] = target;
+  tree[parent.index] = parent;
 
   return { ...tree };
 }
 
-export const ROOT_NODE = {
-  data: "",
-  index: "root",
-  children: [],
-};
+export function createDefaultRoot() {
+  return {
+    data: "",
+    index: "root",
+    children: [],
+  };
+}

@@ -1,7 +1,10 @@
-import { LoaderFunctionArgs } from "@remix-run/node";
+import { LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import React, { useEffect, useState } from "react";
+import { Alert } from "~/components/ui/alert";
 import { Editor } from "~/components/ui/app/editor/editor";
+import { SelectParent } from "~/components/ui/app/select-parent";
+import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
 import { EditorProvider } from "~/providers/editor.provider";
@@ -22,18 +25,16 @@ export async function loader({ params }: LoaderFunctionArgs) {
     logger.error(error);
   }
 
-  return {
-    data: result ?? {
-      coverImage: "",
-      content: [],
-      title: "",
-    },
-  };
+  if (!result) {
+    throw redirect("/home");
+  }
+
+  return { data: result };
 }
 
-export function ErrorBoundary() {
-  return <h1>No!</h1>;
-}
+// export function ErrorBoundary() {
+//   return <h1>No!</h1>;
+// }
 
 const EditorSkeleton = ({ children }: React.PropsWithChildren) => {
   const navigation = useNavigation();
@@ -75,6 +76,26 @@ export default function WorkspacePage() {
   return (
     <EditorProvider initialValue={data}>
       <EditorSkeleton>
+        {data.archivedOn && (
+          <Alert
+            className="sticky z-20 bg-red-950 border-none rounded-none text-white flex justify-between items-center p-1 px-4"
+            variant={"destructive"}
+          >
+            This page is archived
+            <SelectParent
+              page={{ data: data.title, index: data.id }}
+              renderTriggerButton={() => (
+                <Button
+                  className="text-green-500 font-medium"
+                  variant={"outline"}
+                  size={"sm"}
+                >
+                  Unarchived
+                </Button>
+              )}
+            ></SelectParent>
+          </Alert>
+        )}
         <Editor className="transition-[display] duration-200 delay-200 " />
       </EditorSkeleton>
     </EditorProvider>
