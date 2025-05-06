@@ -91,10 +91,10 @@ export function WorkspaceView() {
           renderItemTitle={({ title, item, context }) => {
             return (
               <ContextMenu>
-                <span className="group flex items-center justify-between w-full">
+                <span className="group flex items-center justify-between w-11/12">
                   <ContextMenuTrigger asChild>
                     <Link
-                      className="text-left flex-shrink text-ellipsis flex-grow"
+                      className="text-left flex-shrink text-ellipsis flex-grow overflow-hidden"
                       to={`/${workspace.id}/${item.index}`}
                     >
                       {title}

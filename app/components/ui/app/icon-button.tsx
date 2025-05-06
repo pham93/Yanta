@@ -23,7 +23,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       <TooltipProvider>
         <Tooltip delayDuration={250} {...tooltipProps}>
           <TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" {...props} ref={ref}>
+            <Button size="sm" variant="ghost" {...props} ref={ref}>
               {children}
             </Button>
           </TooltipTrigger>

@@ -1,48 +1,68 @@
-// import React, { createContext, useContext, useRef } from "react";
-// import { useStore } from "zustand";
-// import {
-//   createWorkspaceStore,
-//   WorkspaceState,
-//   WorkspacesStore,
-//   WorkspaceStoreApi,
-// } from "~/store/workspaces.store";
+import { StateCreator, useStore } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { createStore } from "zustand/vanilla";
+import { cookieStorage } from "zustand-cookie-storage";
+import React, { createContext, useContext, useRef } from "react";
+import { UserPreferences } from "~/schemas/user-preferences.schema";
 
-// const AppStoreContext = createContext<WorkspaceStoreApi | undefined>(undefined);
+export type AppState = UserPreferences;
 
-// export const WorkspaceProvider = ({
-//   children,
-//   initialValue,
-// }: React.PropsWithChildren & { initialValue?: WorkspaceState }) => {
-//   const storeRef = useRef<WorkspaceStoreApi>();
+interface AppAction {
+  toggleComment: () => void;
+  toggleSidebar: () => void;
+}
 
-//   if (!storeRef.current) {
-//     storeRef.current = createWorkspaceStore(initialValue);
-//   }
+type AppStore = AppState & AppAction;
 
-//   return (
-//     <AppStoreContext.Provider value={storeRef.current}>
-//       {children}
-//     </AppStoreContext.Provider>
-//   );
-// };
+const appStateSlice: StateCreator<AppStore> = (set, get) => ({
+  commentOpen: false,
+  sidebarOpen: true,
+  toggleComment() {
+    const { commentOpened } = get();
+    set({ commentOpened: !commentOpened });
+  },
+  toggleSidebar() {
+    const { sidebarOpened } = get();
+    set({ sidebarOpened: !sidebarOpened });
+  },
+});
 
-// export const useAppStore = () => {
-//   const context = useContext(AppStoreContext);
+export const createAppStore = (initialState: Partial<AppState>) =>
+  createStore<AppStore>()(
+    persist((...args) => ({ ...appStateSlice(...args), ...initialState }), {
+      name: "yanta-app-preferences",
+      storage: createJSONStorage(() => cookieStorage),
+    })
+  );
 
-//   if (!context) {
-//     throw new Error("No appstore provider with workspace store");
-//   }
-//   return context;
-// };
+export type AppStoreApi = ReturnType<typeof createAppStore>;
 
-// export const useWorkspaceStore = <T,>(
-//   selector: (store: WorkspacesStore) => T
-// ) => {
-//   const context = useContext(AppStoreContext);
+const AppContext = createContext<AppStoreApi | undefined>(undefined);
 
-//   if (!context) {
-//     throw new Error("No appstore provider with workspace store");
-//   }
+export const AppProvider = ({
+  children,
+  initialValue,
+}: React.PropsWithChildren & { initialValue: Partial<AppState> }) => {
+  const storeRef = useRef<AppStoreApi>();
 
-//   return useStore(context, selector);
-// };
+  if (!storeRef.current) {
+    storeRef.current = createAppStore(initialValue);
+    console.log("current", storeRef.current);
+  }
+
+  return (
+    <AppContext.Provider value={storeRef.current}>
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+export const useAppStore = <T,>(selector: (store: AppStore) => T) => {
+  const context = useContext(AppContext);
+
+  if (!context) {
+    throw new Error("No app provider");
+  }
+
+  return useStore(context, selector);
+};

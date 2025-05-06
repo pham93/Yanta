@@ -4,14 +4,14 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
   useParams,
 } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
+import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 
 import "./tailwind.css";
 import { SidebarProvider } from "./components/ui/sidebar";
 import Sidebar from "./components/ui/app/sidebar";
-import Header from "./components/ui/app/header";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -20,12 +20,28 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { ImperativePanelHandle } from "react-resizable-panels";
 import { cn } from "./lib/utils";
-import usePersistenceStore from "./hooks/use-persistence-store";
+import { ToastProvider } from "./components/ui/toast";
+import { Toaster } from "./components/ui/toaster";
+import { AppProvider, useAppStore } from "./providers/app.provider";
+import { parseYantaCookies } from "./cookies.server";
+import { userPreferencesSchema } from "./schemas/user-preferences.schema";
+import { tryCatch } from "./utils/tryCatch";
+import Header from "./components/ui/app/header";
 
 export const links: LinksFunction = () => [];
 
+export async function loader({ request }: LoaderFunctionArgs) {
+  const userPrefs = parseYantaCookies(request);
+  const { result } = tryCatch(() => userPreferencesSchema.parse(userPrefs));
+  if (!result) {
+    return {};
+  }
+  return result;
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const { id } = useParams();
+  const userPrefs = useLoaderData<typeof loader>();
 
   return (
     <html lang="en" className="dark">
@@ -37,7 +53,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <AppProvider initialValue={userPrefs}>{children}</AppProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -49,41 +65,45 @@ export default function App() {
   const ref = useRef<ImperativePanelHandle | null>(null);
   const [onDrag, setOnDrag] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const sidebarExpanded = usePersistenceStore((state) => state.sidebarExpanded);
+
+  const sidebarOpen = useAppStore((state) => state.sidebarOpened);
 
   useEffect(() => {
     if (!ref?.current) {
       return;
     }
     setIsClient(true);
-    sidebarExpanded ? ref.current.expand(20) : ref.current.collapse();
-  }, [sidebarExpanded]);
+    sidebarOpen ? ref.current.expand(20) : ref.current.collapse();
+  }, [sidebarOpen]);
 
   return (
-    <SidebarProvider>
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel
-          className={cn({
-            "duration-300 transition-all ease-in-out": !onDrag && isClient,
-          })}
-          order={1}
-          collapsible={!onDrag}
-          collapsedSize={0}
-          minSize={15}
-          defaultSize={20}
-          maxSize={30}
-          ref={ref}
-        >
-          <Sidebar />
-        </ResizablePanel>
-        <ResizableHandle withHandle onDragging={setOnDrag} />
-        <ResizablePanel defaultSize={75} order={2}>
-          <main className="w-full h-screen overflow-hidden flex flex-col">
-            <Header />
-            <Outlet />
-          </main>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </SidebarProvider>
+    <ToastProvider>
+      <SidebarProvider>
+        <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel
+            className={cn({
+              "duration-300 transition-all ease-in-out": !onDrag && isClient,
+            })}
+            order={1}
+            collapsible={!onDrag}
+            collapsedSize={0}
+            minSize={15}
+            defaultSize={sidebarOpen ? 20 : 0}
+            maxSize={30}
+            ref={ref}
+          >
+            <Sidebar />
+          </ResizablePanel>
+          <ResizableHandle withHandle onDragging={setOnDrag} />
+          <ResizablePanel defaultSize={80} order={2}>
+            <main className="w-full h-screen overflow-hidden flex flex-col">
+              <Header />
+              <Outlet />
+              <Toaster />
+            </main>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </SidebarProvider>
+    </ToastProvider>
   );
 }

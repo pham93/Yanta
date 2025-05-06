@@ -7,6 +7,7 @@ export interface EditorState extends Partial<PageInsert> {
   cover?: string | null;
   content?: Block[];
   title: string;
+  lastModified: Date;
 }
 
 interface EditorAction {
@@ -19,6 +20,7 @@ export type EditorStore = EditorState & EditorAction;
 export const createEditorStore = (initialState: Partial<EditorState> = {}) =>
   createStore<EditorStore>((set, get) => ({
     title: "",
+    lastModified: new Date(),
     ...initialState,
 
     getState: get,

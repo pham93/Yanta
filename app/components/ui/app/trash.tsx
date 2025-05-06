@@ -1,11 +1,11 @@
 import { Trash2, Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../popover";
 import { Input } from "../input";
-import { SidebarMenuButton } from "../sidebar";
+import { SidebarMenuButton, SidebarMenuItem } from "../sidebar";
 import { useWorkspaceStore } from "~/store/workspaces.store";
 import { useState } from "react";
 import { ControlledTreeEnvironment, Tree } from "../tree";
-import { useFetcher } from "@remix-run/react";
+import { Link, useFetcher } from "@remix-run/react";
 import IconButton from "./icon-button";
 import { SelectParent } from "./select-parent";
 import { PageTreeItem } from "~/schemas/workspace.schema";
@@ -24,10 +24,16 @@ export function Trash() {
   return (
     <Popover open={open} onOpenChange={(e) => setOpen(e)}>
       <PopoverTrigger asChild>
-        <SidebarMenuButton onClick={() => setOpen(true)}>
-          <Trash2 className="h-4 w-4 mr-2" />
-          Open trash
-        </SidebarMenuButton>
+        <SidebarMenuItem onClick={() => setOpen(!open)}>
+          <SidebarMenuButton asChild>
+            <span className="cursor-pointer">
+              <Trash2 className="h-4 w-4 mr-2" />
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                Open trash
+              </span>
+            </span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
       </PopoverTrigger>
       <PopoverPortal>
         <PopoverContent
@@ -35,7 +41,6 @@ export function Trash() {
           align="end"
           sideOffset={15}
           asChild
-          onFocusOutside={(e) => e.preventDefault()}
           side="right"
         >
           <div className="flex gap-4 flex-col h-full">

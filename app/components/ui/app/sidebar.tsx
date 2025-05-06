@@ -50,36 +50,36 @@ export default function Sidebar() {
   const [isCollapsed] = useState<boolean>(false);
 
   return (
-    <SidebarComponent collapsible="none" className="h-screen w-full">
+    <SidebarComponent
+      collapsible="none"
+      className="h-screen w-full overflow-hidden"
+    >
       {/* Header */}
       <SidebarHeader className="border-b">
         <SidebarMenuItem className="flex">
           <SidebarMenuButton className="flex items-center justify-between flex-row">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-6 w-6">
-                <AvatarImage alt="User avatar" />
-                <AvatarFallback color="green">JD</AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-medium">John Doe</span>
-            </div>
-            <div>
-              <IconButton tooltipContent="Open this" asChild>
-                <Link to="/">
-                  <Menu className="h-4 w-4" />
-                </Link>
-              </IconButton>
-              <IconButton tooltipContent="Add new note" asChild>
-                <Link to="/">
-                  <Plus className="h-3 w-3 mr-1" />
-                </Link>
-              </IconButton>
-            </div>
+            <Avatar className="h-6 w-6">
+              <AvatarImage alt="User avatar" />
+              <AvatarFallback color="green">JD</AvatarFallback>
+            </Avatar>
+            <span className="text-sm font-medium whitespace-pre overflow-hidden text-ellipsis flex-1">
+              John Doe
+            </span>
+            <IconButton tooltipContent="Open this" className="inline-block p-0">
+              <Menu />
+            </IconButton>
+            <IconButton
+              tooltipContent="Add new note"
+              className="inline-block p-0"
+            >
+              <Plus />
+            </IconButton>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarHeader>
 
       {/* Content */}
-      <SidebarContent>
+      <SidebarContent className="overflow-hidden">
         {/* Main Navigation */}
         <SidebarGroup>
           <SidebarMenu>
