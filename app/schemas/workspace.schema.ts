@@ -1,7 +1,6 @@
 import { createSchemaFactory } from "drizzle-zod";
 import { z } from "zod";
 import { pages, workspaces } from "~/db/schema";
-import { archivePages } from "~/services/page.service";
 
 const { createInsertSchema, createSelectSchema, createUpdateSchema } =
   createSchemaFactory({
@@ -10,6 +9,7 @@ const { createInsertSchema, createSelectSchema, createUpdateSchema } =
 
 // PAGE
 export const pageSchema = createSelectSchema(pages);
+
 export const pageInsertSchema = createInsertSchema(pages).extend({
   id: z.string().uuid(),
   title: z
@@ -19,7 +19,12 @@ export const pageInsertSchema = createInsertSchema(pages).extend({
 });
 export const pageUpdateSchema = createUpdateSchema(pages).extend({
   id: z.string().uuid(),
+  title: z
+    .string()
+    .optional()
+    .transform((e) => e || "New Title"),
 });
+
 export type PageInsert = z.infer<typeof pageInsertSchema>;
 export type Page = z.infer<typeof pageSchema>;
 export type PageUpdate = z.infer<typeof pageUpdateSchema>;

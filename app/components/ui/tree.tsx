@@ -22,6 +22,7 @@ import {
 import style from "./tree.module.css";
 import { Input } from "./input";
 import { merge } from "es-toolkit";
+import DynamicIcon from "./dynamic-icon";
 
 declare module "react-complex-tree" {
   interface TreeItem<T> {
@@ -75,7 +76,7 @@ const RenderItem = <T = string,>({
         variant="ghost"
         role="menuitem"
         className={cn(
-          "w-full justify-start px-1 py-1 gap-1 focus-visible:ring-primary h-8 cursor-pointer",
+          "w-full justify-start px-1 py-1 gap-1 focus-visible:ring-primary h-8 cursor-pointer group",
           { "animate-pulse pointer-events-none opacity-40": item.isLoading }
         )}
         {...context.itemContainerWithoutChildrenProps}
@@ -92,20 +93,26 @@ const RenderItem = <T = string,>({
       >
         <li>
           {/* carot */}
-          {item.children && item.children.length > 0 ? (
+          {item.children && item.children.length > 0 && (
             <CollapsibleTrigger
               asChild
               className={cn("cursor-pointer duration-200 min-w-4 min-h-4", {
                 "rotate-90": isExpanded,
               })}
             >
-              <span>
+              <span className="group-hover:block hidden">
                 {treeProps.renderItemArrow ? arrow : <LucideChevronRight />}
               </span>
             </CollapsibleTrigger>
-          ) : (
-            <span className="node-no-children min-w-4 min-h-4"></span>
           )}
+
+          <DynamicIcon
+            name="Folder"
+            className={cn({
+              "min-w-4 min-h-4 group-hover:hidden":
+                item.children && item.children.length > 0,
+            })}
+          />
           {title}
         </li>
       </Button>

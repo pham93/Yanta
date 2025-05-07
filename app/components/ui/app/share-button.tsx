@@ -6,7 +6,6 @@ export function ShareButton() {
   const toast = useToast();
 
   const handleShare = async () => {
-    console.log("handle shared");
     const { error } = await tryCatch(
       navigator.clipboard.writeText(window.location.href)
     );

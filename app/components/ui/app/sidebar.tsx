@@ -57,23 +57,31 @@ export default function Sidebar() {
       {/* Header */}
       <SidebarHeader className="border-b">
         <SidebarMenuItem className="flex">
-          <SidebarMenuButton className="flex items-center justify-between flex-row">
-            <Avatar className="h-6 w-6">
-              <AvatarImage alt="User avatar" />
-              <AvatarFallback color="green">JD</AvatarFallback>
-            </Avatar>
-            <span className="text-sm font-medium whitespace-pre overflow-hidden text-ellipsis flex-1">
-              John Doe
+          <SidebarMenuButton
+            className="flex items-center justify-between flex-row"
+            asChild
+          >
+            <span role="button">
+              <Avatar className="h-6 w-6">
+                <AvatarImage alt="User avatar" />
+                <AvatarFallback color="green">JD</AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium whitespace-pre overflow-hidden text-ellipsis flex-1">
+                John Doe
+              </span>
+              <IconButton
+                tooltipContent="Open this"
+                className="inline-block p-0"
+              >
+                <Menu />
+              </IconButton>
+              <IconButton
+                tooltipContent="Add new note"
+                className="inline-block p-0"
+              >
+                <Plus />
+              </IconButton>
             </span>
-            <IconButton tooltipContent="Open this" className="inline-block p-0">
-              <Menu />
-            </IconButton>
-            <IconButton
-              tooltipContent="Add new note"
-              className="inline-block p-0"
-            >
-              <Plus />
-            </IconButton>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarHeader>

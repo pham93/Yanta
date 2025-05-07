@@ -11,7 +11,7 @@ import {
   uniqueUuidArraySchema,
   Workspace,
 } from "~/schemas/workspace.schema";
-import { archivePages, upsertPage } from "~/services/page.service";
+import { archivePages, getPage, upsertPage } from "~/services/page.service";
 import { getWorkspace, updateWorkspace } from "~/services/workspace.service";
 import {
   addTreeItem,
@@ -97,6 +97,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
         page: string;
       };
       const page = pageUpdateSchema.parse(JSON.parse(pageStr));
+
+      const dbPage = await getPage(page.id, workspaceId);
+      console.log(dbPage);
+      if (dbPage?.archivedOn) {
+        console.log("page is readonly");
+        throw new Error("Page is readonly");
+      }
+
       const result = await getWorkspace(workspaceId);
       if (!result) {
         return false;
@@ -105,7 +113,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
       await Promise.allSettled([
         updateWorkspace(updatedWorkspace),
-        upsertPage({ workspaceId, title: "New Title", ...page }),
+        upsertPage({ workspaceId, ...page }),
       ]);
       break;
     }

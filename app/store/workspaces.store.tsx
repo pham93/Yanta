@@ -77,8 +77,6 @@ const stateSlice: StateCreator<WorkspacesStore> = (set, get) => ({
       newParent,
     };
 
-    console.log(fetcher, payload);
-
     fetcher?.submit(
       { ...payload },
       {

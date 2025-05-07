@@ -12,7 +12,7 @@ import { cn } from "~/lib/utils";
 import { Img } from "~/components/ui/image";
 import { useEditorStore } from "~/providers/editor.provider";
 
-const CoverImage = () => {
+const CoverImage = ({ disabled }: { disabled?: boolean }) => {
   const cover = useEditorStore((state) => state.cover);
   const updateEditor = useEditorStore((state) => state.update);
 
@@ -39,7 +39,7 @@ const CoverImage = () => {
         <div className="w-full h-[4rem]" />
       )}
       <Popover>
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild disabled={disabled}>
           <Button
             size="sm"
             variant={"ghost"}

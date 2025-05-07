@@ -67,6 +67,7 @@ export function getAcestry(
     return [];
   }
   const parent = getParent(target, tree);
+  console.log(parent, target, tree);
   if (!parent) {
     throw new Error(
       "It shouldn't be like this. Your tree should always have a parent"

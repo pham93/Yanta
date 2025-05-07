@@ -10,8 +10,9 @@ import { cn } from "~/lib/utils";
 import { useEditorStore } from "~/providers/editor.provider";
 import { useWorkspaceStore } from "~/store/workspaces.store";
 import { useFetcher } from "@remix-run/react";
+import { IconEmojiPicker } from "./page-icon";
 
-export function EditorContent() {
+export function EditorContent({ disabled }: { disabled?: boolean }) {
   // Stores the document JSON.
   //
   const updateEditor = useEditorStore((state) => state.update);
@@ -44,6 +45,7 @@ export function EditorContent() {
     <BlockNoteView
       className={`editor ${style.editor} pb-24`}
       editor={editor}
+      editable={!disabled}
       data-editor-theme="one"
       onChange={() => {
         // Saves the document JSON to state.
@@ -56,7 +58,7 @@ export function EditorContent() {
 
 export interface EditorProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-const Title = () => {
+const Title = ({ disabled }: { disabled?: boolean }) => {
   const title = useEditorStore((state) => state.title);
   const updateEditor = useEditorStore((state) => state.update);
   const getEditorSnapshot = useEditorStore((state) => state.getState);
@@ -79,6 +81,7 @@ const Title = () => {
     <input
       type="text"
       value={title}
+      disabled={disabled}
       name="title"
       contentEditable
       maxLength={100}
@@ -97,20 +100,26 @@ export const Editor = ({
   className,
   ...props
 }: React.ComponentProps<"div">) => {
+  const disabled = useEditorStore((state) => state.archivedOn != null);
+
   return (
     <div
-      className={cn("content overflow-auto flex flex-col", className)}
+      className={cn("content overflow-auto flex flex-col relative", className)}
       {...props}
     >
-      <CoverImage />
-      <div className="editor-container mx-20">
-        <Title />
+      <CoverImage disabled={disabled} />
+      <div className="editor-container mx-20 relative">
+        <IconEmojiPicker
+          className="absolute -top-11 left-10 z-10"
+          disabled={disabled}
+        />
+        <Title disabled={disabled} />
         <ClientOnly
           fallback={
             <textarea name="content" className="w-full bg-transparent" />
           }
         >
-          {() => <EditorContent />}
+          {() => <EditorContent disabled={disabled} />}
         </ClientOnly>
       </div>
     </div>

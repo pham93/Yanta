@@ -12,7 +12,7 @@ export const pages = yantaSchema.table("pages", {
     .defaultNow()
     .notNull(),
   modifiedBy: varchar("modified_by"), // Varchar, nullable
-  title: varchar("title").default("New Title").notNull(), // Varchar, nullable
+  title: varchar("title").default("New Title").notNull(),
   content: jsonb("content"),
   cover: varchar("cover"), // Varchar, nullable
   archivedOn: timestamp("archived_on", { withTimezone: true }),

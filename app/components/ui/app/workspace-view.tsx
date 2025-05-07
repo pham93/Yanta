@@ -15,6 +15,7 @@ import { ControlledTreeEnvironment, Tree } from "../tree";
 import { TreeItem, TreeItemIndex } from "react-complex-tree";
 import { useWorkspaceStore } from "~/store/workspaces.store";
 import { Skeleton } from "../skeleton";
+import DynamicIcon from "../dynamic-icon";
 
 export function WorkspaceView() {
   const updatePage = useWorkspaceStore((state) => state.updatePage);
@@ -97,7 +98,7 @@ export function WorkspaceView() {
                       className="text-left flex-shrink text-ellipsis flex-grow overflow-hidden"
                       to={`/${workspace.id}/${item.index}`}
                     >
-                      {title}
+                      {title || "New Title"}
                     </Link>
                   </ContextMenuTrigger>
                   <span>

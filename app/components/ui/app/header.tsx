@@ -19,13 +19,59 @@ import { useWorkspaceStore } from "~/store/workspaces.store";
 import { getAcestry } from "~/utils/tree-control";
 import { Link, useParams } from "@remix-run/react";
 import { cn } from "~/lib/utils";
-import { useEditorStore } from "~/providers/editor.provider";
 import { ShareButton } from "./share-button";
 import { useAppStore } from "~/providers/app.provider";
+import { useShallow } from "zustand/shallow";
+
+function NavigationCrumb() {
+  const { page: pageId, workspace: workspaceId } = useParams();
+  const { pages, archivedPages } = useWorkspaceStore(
+    useShallow((state) => ({
+      pages: state.workspace?.pages,
+      archivedPages: state.workspace?.archivedPages,
+    }))
+  );
+
+  const navigationCrumbs = useMemo(() => {
+    if (!pageId || !pages) {
+      return [];
+    }
+    const tree = pages[pageId] ? pages : archivedPages ?? {};
+
+    return getAcestry({ index: pageId, data: "" }, tree).map((e) => ({
+      name: tree[e].data,
+      id: e,
+    }));
+  }, [pages, pageId, archivedPages]);
+
+  return (
+    <Breadcrumb>
+      <BreadcrumbList className="gap-0 sm:gap-0">
+        {pages &&
+          navigationCrumbs.map(({ id, name }, idx) => (
+            <span key={id} className="flex flex-row">
+              <BreadcrumbItem>
+                <BreadcrumbLink
+                  href="#"
+                  className={cn({ "text-primary": id === pageId })}
+                  asChild
+                >
+                  <Link to={`/${workspaceId}/${id}`}>{name}</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              {idx !== navigationCrumbs.length - 1 ? (
+                <BreadcrumbSeparator className="mx-2">/</BreadcrumbSeparator>
+              ) : null}
+            </span>
+          ))}
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+}
 
 export default function Header() {
   // State for editable breadcrumb items
-  const pages = useWorkspaceStore((state) => state.workspace?.pages);
 
   // const lastModified = useEditorStore((state) => state.lastModified);
 
@@ -37,45 +83,12 @@ export default function Header() {
   //   second: "2-digit",
   // }).format(new Date(lastModified));
 
-  const { page: pageId, workspace: workspaceId } = useParams();
-
-  const navigationCrumbs = useMemo(() => {
-    if (!pageId || !pages) {
-      return [];
-    }
-
-    return getAcestry({ index: pageId, data: "" }, pages);
-  }, [pages, pageId]);
-
   const toggleSidebar = useAppStore((state) => state.toggleSidebar);
 
   return (
     <header className="flex items-center px-2 py-1 border-b w-full">
       <SidebarTrigger className="mr-2" onClick={() => toggleSidebar()} />
-      <Breadcrumb>
-        <BreadcrumbList className="gap-0 sm:gap-0">
-          {pages &&
-            navigationCrumbs.map((nav, idx) => (
-              <span key={nav} className="flex flex-row">
-                <BreadcrumbItem>
-                  <BreadcrumbLink
-                    href="#"
-                    className={cn({ "text-primary": nav === pageId })}
-                    asChild
-                  >
-                    <Link to={`/${workspaceId}/${nav}`} prefetch="intent">
-                      {pages[nav].data as string}
-                    </Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-
-                {idx !== navigationCrumbs.length - 1 ? (
-                  <BreadcrumbSeparator className="mx-2">/</BreadcrumbSeparator>
-                ) : null}
-              </span>
-            ))}
-        </BreadcrumbList>
-      </Breadcrumb>
+      <NavigationCrumb />
       <div className="flex flex-grow" />
 
       {/* Right Side - Actions */}

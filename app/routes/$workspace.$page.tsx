@@ -3,7 +3,6 @@ import { useLoaderData, useNavigation } from "@remix-run/react";
 import React, { useEffect, useState } from "react";
 import { Alert } from "~/components/ui/alert";
 import { Editor } from "~/components/ui/app/editor/editor";
-import Header from "~/components/ui/app/header";
 import { SelectParent } from "~/components/ui/app/select-parent";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
