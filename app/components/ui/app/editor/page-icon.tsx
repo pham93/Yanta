@@ -19,6 +19,9 @@ import {
   EmojiPickerFooter,
   EmojiPickerSearch,
 } from "components/ui/emoji-picker";
+import { useFetcher } from "@remix-run/react";
+import { useWorkspaceStore } from "~/store/workspaces.store";
+import { useEditorStore } from "~/providers/editor.provider";
 
 // Utility to get all Lucide icon names
 const lucideIconNames = Object.keys(icons);
@@ -31,18 +34,28 @@ export function IconEmojiPicker({
   disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+  const icon = useEditorStore((state) => state.icon);
+  const updateEditor = useEditorStore((state) => state.update);
   const [search, setSearch] = useState("");
+  const fetcher = useFetcher();
+  const updatePage = useWorkspaceStore((state) => state.updatePage);
+  const editorStateId = useEditorStore((state) => state.id);
 
   // Handle icon/emoji selection
   const handleSelect = (icon: string) => {
-    setSelectedIcon(icon);
+    updateEditor({ icon });
+    if (editorStateId) {
+      updatePage({ id: editorStateId, icon }, fetcher);
+    }
     setOpen(false);
   };
 
   // Handle remove icon
   const handleRemove = () => {
-    setSelectedIcon(null);
+    updateEditor({ icon });
+    if (editorStateId) {
+      updatePage({ id: editorStateId, icon }, fetcher);
+    }
     setOpen(false);
   };
 
@@ -60,17 +73,17 @@ export function IconEmojiPicker({
       >
         <Button
           variant="ghost"
-          className={cn("w-20 h-20 p-0 [&_svg]:size-8", className)}
+          className={cn(
+            "w-20 h-20 p-0 [&_svg]:size-8 bg-slate-900 bg-opacity-75",
+            "hover:bg-opacity-15 hover:bg-slate-950",
+            className
+          )}
         >
-          {selectedIcon ? (
-            selectedIcon.includes("Lucide") ? (
-              <DynamicIcon
-                name={selectedIcon.replace("Lucide", "")}
-                className="text-4xl h-9 w-9"
-              />
-            ) : (
-              <span className="text-4xl">{selectedIcon}</span>
-            )
+          {icon ? (
+            <DynamicIcon
+              name={icon}
+              className="text-4xl w-full h-full justify-center items-center flex"
+            />
           ) : (
             <span className="text-sm">
               No <br /> icon
@@ -111,7 +124,7 @@ export function IconEmojiPicker({
                   key={icon}
                   variant={"ghost"}
                   className="max-h-8 max-w-8 text-md"
-                  onClick={() => handleSelect("Lucide" + icon)}
+                  onClick={() => handleSelect(icon)}
                 >
                   <DynamicIcon name={icon} />
                 </Button>

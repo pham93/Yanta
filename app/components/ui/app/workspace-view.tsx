@@ -15,7 +15,7 @@ import { ControlledTreeEnvironment, Tree } from "../tree";
 import { TreeItem, TreeItemIndex } from "react-complex-tree";
 import { useWorkspaceStore } from "~/store/workspaces.store";
 import { Skeleton } from "../skeleton";
-import DynamicIcon from "../dynamic-icon";
+import { PagesTree, PageTreeItem } from "~/schemas/workspace.schema";
 
 export function WorkspaceView() {
   const updatePage = useWorkspaceStore((state) => state.updatePage);
@@ -46,13 +46,16 @@ export function WorkspaceView() {
     );
   }
 
-  const handleRename = (pageTreeItem: TreeItem<string>, name: string) => {
-    pageTreeItem.data = name;
+  const handleRename = (
+    pageTreeItem: TreeItem<PageTreeItem["data"]>,
+    name: string
+  ) => {
+    pageTreeItem.data = { ...pageTreeItem.data, title: name };
     updatePage({ id: pageTreeItem.index as string, title: name }, fetcher);
   };
 
   const handleOnTreeChange = (
-    newTree: Record<TreeItemIndex, TreeItem<string>>
+    newTree: Record<TreeItemIndex, TreeItem<PageTreeItem["data"]>>
   ) => {
     fetcher.submit(
       {
@@ -75,12 +78,12 @@ export function WorkspaceView() {
             <AddNewPageDialog />
           </span>
         </SidebarMenuItem>
-        <ControlledTreeEnvironment<string>
+        <ControlledTreeEnvironment<PageTreeItem["data"]>
           items={workspace.pages}
           viewState={{}}
           renderDepthOffset={10}
           className="mt-0"
-          getItemTitle={(item) => item.data ?? "New Title"}
+          getItemTitle={(item) => item.data.title ?? "New Title"}
           canDragAndDrop={true}
           onTreeOrderChange={handleOnTreeChange}
           onRenameItem={handleRename}

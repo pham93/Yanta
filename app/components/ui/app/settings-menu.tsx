@@ -22,7 +22,7 @@ import { useFetcher } from "@remix-run/react";
 export interface SettingMenuProps {
   type: MenuType;
   context: TreeItemRenderContext<string>;
-  item: TreeItem<string>;
+  item: TreeItem<PageTreeItem["data"]>;
 }
 
 type SettingItem = MenuItem & {

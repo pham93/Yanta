@@ -38,13 +38,24 @@ export async function getWorkspaceWithPages(workspaceId: string) {
         const validPages: PagesTree = {
           root: workspace.pages["root"] ?? createDefaultRoot(),
         };
+        const archivedPages: PagesTree = {
+          root: workspace.archivedPages["root"] ?? createDefaultRoot(),
+        };
+
         for (const page of pages) {
           if (workspace.pages[page.id]) {
             validPages[page.id] = workspace.pages[page.id];
-            validPages[page.id].data = page.title;
+            validPages[page.id].data = { ...page };
+          } else if (workspace.archivedPages[page.id]) {
+            archivedPages[page.id] = workspace.archivedPages[page.id];
+            archivedPages[page.id].data = {
+              ...page,
+            };
           }
         }
         workspace.pages = validPages;
+        workspace.archivedPages = archivedPages;
+
         return workspace;
       }
     )

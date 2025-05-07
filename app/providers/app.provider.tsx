@@ -47,7 +47,6 @@ export const AppProvider = ({
 
   if (!storeRef.current) {
     storeRef.current = createAppStore(initialValue);
-    console.log("current", storeRef.current);
   }
 
   return (

@@ -15,6 +15,13 @@
       "when": 1745231391203,
       "tag": "0001_archived_column_workspaces_table",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1746605015057,
+      "tag": "0002_add_icon_column_pages_table",
+      "breakpoints": true
     }
   ]
 }

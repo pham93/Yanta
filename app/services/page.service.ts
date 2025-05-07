@@ -39,7 +39,7 @@ export async function unarchivePage(ids: string[]) {
 
 export async function getPagesByWorkspace(workspaceId: string) {
   return db.query.pages.findMany({
-    where: and(eq(pages.workspaceId, workspaceId), isNull(pages.archivedOn)),
+    where: and(eq(pages.workspaceId, workspaceId)),
   });
 }
 

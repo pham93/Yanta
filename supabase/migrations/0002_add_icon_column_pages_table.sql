@@ -1,0 +1,1 @@
+ALTER TABLE "yanta"."pages" ADD COLUMN "icon" varchar;

@@ -129,7 +129,11 @@ const stateSlice: StateCreator<WorkspacesStore> = (set, get) => ({
     const updatedWorkspace = workspaceTree.updatePage(activeWorkspace, page);
 
     updatedWorkspace.pages[page.id].isLoading = !!fetcher;
-    updatedWorkspace.pages[page.id].data = page.title!;
+    const data = updatedWorkspace.pages[page.id].data;
+    updatedWorkspace.pages[page.id].data = {
+      ...data,
+      ...page,
+    };
 
     set({ workspace: { ...updatedWorkspace } });
 
@@ -137,7 +141,7 @@ const stateSlice: StateCreator<WorkspacesStore> = (set, get) => ({
       submitWorkspace(
         get,
         {
-          page: JSON.stringify({ id: page.id, title: page.title }),
+          page: JSON.stringify(page),
         },
         "PUT",
         fetcher

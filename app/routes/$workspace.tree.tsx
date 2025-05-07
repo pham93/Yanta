@@ -99,9 +99,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       const page = pageUpdateSchema.parse(JSON.parse(pageStr));
 
       const dbPage = await getPage(page.id, workspaceId);
-      console.log(dbPage);
       if (dbPage?.archivedOn) {
-        console.log("page is readonly");
         throw new Error("Page is readonly");
       }
 

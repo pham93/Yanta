@@ -57,10 +57,10 @@ export function Trash() {
 
             {/* Results */}
             <div className="overflow-auto px-6">
-              <ControlledTreeEnvironment<string>
+              <ControlledTreeEnvironment<PageTreeItem["data"]>
                 className="relative"
                 items={archivedPages ?? {}}
-                getItemTitle={(item) => item.data}
+                getItemTitle={(item) => item.data.title}
                 viewState={{}}
                 autoFocus={false}
                 renderItemTitle={({ title, item }) => (

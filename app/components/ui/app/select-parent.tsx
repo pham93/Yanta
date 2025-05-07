@@ -16,9 +16,10 @@ import { Button } from "../button";
 import { ControlledTreeEnvironment, Tree } from "../tree";
 import { useState } from "react";
 import { TreeItemIndex } from "react-complex-tree";
+import { PageTreeItem } from "~/schemas/workspace.schema";
 
 interface SelectParentProps {
-  page: { data: string; index: string };
+  page: Pick<PageTreeItem, "data" | "index">;
   renderTriggerButton?: () => React.ReactElement;
 }
 
@@ -50,7 +51,9 @@ export function SelectParent({ page, renderTriggerButton }: SelectParentProps) {
       <DialogContent autoFocus={false} onOpenAutoFocus={() => {}}>
         <DialogHeader>
           <DialogTitle>Choose parent</DialogTitle>
-          <DialogDescription>Select parent for {page.data}</DialogDescription>
+          <DialogDescription>
+            Select parent for {page.data.title}
+          </DialogDescription>
           <DialogClose></DialogClose>
         </DialogHeader>
         <ControlledTreeEnvironment
@@ -61,7 +64,7 @@ export function SelectParent({ page, renderTriggerButton }: SelectParentProps) {
               selectedItems: [selectedParent],
             },
           }}
-          getItemTitle={(item) => item.data ?? ""}
+          getItemTitle={(item) => item.data.title ?? ""}
           renderItemTitle={({ context, item }) => {
             return (
               <button
@@ -70,7 +73,7 @@ export function SelectParent({ page, renderTriggerButton }: SelectParentProps) {
                   setSelectedParent(context.isSelected ? "" : item.index);
                 }}
               >
-                {item.data}
+                {item.data.title}
                 {context.isSelected && (
                   <Check className="h-4 w-4 text-green-300" />
                 )}

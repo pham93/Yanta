@@ -1,5 +1,6 @@
 import { icons, LucideIcon } from "lucide-react";
 import { ComponentProps } from "react";
+import { cn } from "~/lib/utils";
 
 function DynamicIcon({
   name,
@@ -8,7 +9,7 @@ function DynamicIcon({
   const Icon = icons[name as keyof typeof icons] || null;
 
   if (!Icon) {
-    return null;
+    return <span className={cn("size-4", props.className)}>{name}</span>;
   }
 
   return <Icon {...props} />;

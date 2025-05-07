@@ -21,7 +21,11 @@ import { createEditorStore } from "~/store/editor.store";
 import { TreeItem } from "react-complex-tree";
 import { clientAction } from "~/routes/$workspace.tree";
 
-function AddNewPageDialog({ parent }: { parent?: TreeItem<string> }) {
+function AddNewPageDialog({
+  parent,
+}: {
+  parent?: TreeItem<PageTreeItem["data"]>;
+}) {
   const fetcher = useFetcher<typeof clientAction>();
   const [open, setOpen] = useState(false);
   const { workspace: workspaceId } = useParams();

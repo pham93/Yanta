@@ -18,7 +18,8 @@ export const pages = yantaSchema.table("pages", {
   archivedOn: timestamp("archived_on", { withTimezone: true }),
   workspaceId: uuid("workspace_id")
     .notNull()
-    .references(() => workspaces.id), // UUID, nullable, default gen_random_uuid()
+    .references(() => workspaces.id),
+  icon: varchar("icon"),
 });
 
 // Define the workspaces table

@@ -107,7 +107,7 @@ const RenderItem = <T = string,>({
           )}
 
           <DynamicIcon
-            name="Folder"
+            name={item.data.icon ?? "Folder"}
             className={cn({
               "min-w-4 min-h-4 group-hover:hidden":
                 item.children && item.children.length > 0,

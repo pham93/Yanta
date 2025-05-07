@@ -79,7 +79,7 @@ export default function WorkspacePage() {
           >
             This page is archived
             <SelectParent
-              page={{ data: data.title, index: data.id }}
+              page={{ data: data, index: data.id }}
               renderTriggerButton={() => (
                 <Button
                   className="text-green-500 font-medium"

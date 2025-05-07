@@ -14,15 +14,15 @@ export const pageInsertSchema = createInsertSchema(pages).extend({
   id: z.string().uuid(),
   title: z
     .string()
-    .optional()
-    .transform((e) => e || "New Title"),
+    .transform((e) => e || "New Title")
+    .optional(),
 });
 export const pageUpdateSchema = createUpdateSchema(pages).extend({
   id: z.string().uuid(),
   title: z
     .string()
-    .optional()
-    .transform((e) => e || "New Title"),
+    .transform((e) => e || "New Title")
+    .optional(),
 });
 
 export type PageInsert = z.infer<typeof pageInsertSchema>;
@@ -37,7 +37,7 @@ export const uniqueUuidArraySchema = z
   });
 const PageIndexSchema = z.union([z.string().uuid(), z.literal("root")]);
 export const PageTreeItemSchema = z.object({
-  data: z.string(),
+  data: z.object({ title: z.string(), icon: z.string().optional().nullable() }),
   index: PageIndexSchema,
   canMove: z.boolean().optional(),
   canRename: z.boolean().optional(),
