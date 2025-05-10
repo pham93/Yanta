@@ -3,6 +3,7 @@ import { Outlet, useLoaderData } from "@remix-run/react";
 import { useEffect } from "react";
 import { pagesTreeSchema } from "~/schemas/workspace.schema";
 import {
+  createWorkspace,
   getWorkspaceWithPages,
   updateWorkspace,
 } from "~/services/workspace.service";

@@ -6,7 +6,7 @@ import {
 } from "../sidebar";
 import AddNewPageDialog from "./new-page-dialog";
 import { ContextMenu, ContextMenuTrigger } from "../context-menu";
-import { Link, useFetcher } from "@remix-run/react";
+import { Link, useFetcher, useParams } from "@remix-run/react";
 import { DropdownMenu, DropdownMenuTrigger } from "../dropdown-menu";
 import { Button } from "../button";
 import { MoreVertical } from "lucide-react";
@@ -15,34 +15,32 @@ import { ControlledTreeEnvironment, Tree } from "../tree";
 import { TreeItem, TreeItemIndex } from "react-complex-tree";
 import { useWorkspaceStore } from "~/store/workspaces.store";
 import { Skeleton } from "../skeleton";
-import { PagesTree, PageTreeItem } from "~/schemas/workspace.schema";
+import { PageTreeItem } from "~/schemas/workspace.schema";
 
 export function WorkspaceView() {
   const updatePage = useWorkspaceStore((state) => state.updatePage);
+  const { workspace: workspaceId } = useParams();
   const fetcher = useFetcher();
 
   const workspace = useWorkspaceStore((state) => state.workspace);
 
-  const isLoading = useWorkspaceStore((state) => state.isLoading);
+  const isLoading = useWorkspaceStore(
+    (state) => state.isLoading && workspaceId
+  );
 
-  if (!workspace && !isLoading) {
-    return (
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton>Create new workspace</SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    );
-  }
   if (!workspace) {
     return (
-      <div className="w-full px-2">
-        <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
-        <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
-        <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
-        <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
-        <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
-      </div>
+      <>
+        {isLoading ? (
+          <div className="w-full px-2">
+            <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
+            <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
+            <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
+            <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
+            <Skeleton className="w-full h-6 mt-2 rounded-none"></Skeleton>
+          </div>
+        ) : null}
+      </>
     );
   }
 

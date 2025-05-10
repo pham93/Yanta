@@ -3,6 +3,7 @@ import { db } from "~/db/db.server";
 import { workspaces } from "~/db/schema";
 import {
   PagesTree,
+  WorkspaceInsert,
   WorkspaceUpdate,
   type Workspace,
 } from "~/schemas/workspace.schema";
@@ -82,6 +83,12 @@ export async function updateWorkspace(workspace: WorkspaceUpdate) {
     .set(workspace)
     .where(eq(workspaces.id, workspace.id));
   logger.debug({ workspace: workspace.id }, "Successfully updated workspace");
+  return true;
+}
+
+export async function createWorkspace(workspace: WorkspaceInsert) {
+  await db.insert(workspaces).values(workspace);
+  logger.debug({ workspace: workspace.id }, "Successfully add workspace");
   return true;
 }
 

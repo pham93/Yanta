@@ -37,7 +37,10 @@ export const uniqueUuidArraySchema = z
   });
 const PageIndexSchema = z.union([z.string().uuid(), z.literal("root")]);
 export const PageTreeItemSchema = z.object({
-  data: z.object({ title: z.string(), icon: z.string().optional().nullable() }),
+  data: z.object({
+    title: z.string().default("New Title"),
+    icon: z.string().optional().nullable(),
+  }),
   index: PageIndexSchema,
   canMove: z.boolean().optional(),
   canRename: z.boolean().optional(),
@@ -69,8 +72,7 @@ export const workspaceSchema = createSelectSchema(workspaces).extend({
 });
 
 export const workspaceInsertSchema = createInsertSchema(workspaces).extend({
-  pages: pagesTreeSchema,
-  archivedPages: pagesTreeSchema,
+  name: z.string().nonempty(),
 });
 export const workspaceUpdateSchema = createUpdateSchema(workspaces).extend({
   pages: pagesTreeSchema,

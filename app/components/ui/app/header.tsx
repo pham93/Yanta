@@ -38,7 +38,7 @@ function NavigationCrumb() {
     }
     const tree = pages[pageId] ? pages : archivedPages ?? {};
 
-    return getAcestry({ index: pageId, data: "" }, tree).map((e) => ({
+    return getAcestry({ index: pageId, data: {} }, tree).map((e) => ({
       name: tree[e].data.title,
       id: e,
     }));

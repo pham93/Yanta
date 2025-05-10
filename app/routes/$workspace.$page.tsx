@@ -1,6 +1,6 @@
-import { LoaderFunctionArgs, redirect } from "@remix-run/node";
-import { useLoaderData, useNavigation } from "@remix-run/react";
-import React, { useEffect, useState } from "react";
+import { LoaderFunctionArgs } from "@remix-run/node";
+import { Await, useLoaderData } from "@remix-run/react";
+import { Suspense } from "react";
 import { Alert } from "~/components/ui/alert";
 import { Editor } from "~/components/ui/app/editor/editor";
 import { SelectParent } from "~/components/ui/app/select-parent";
@@ -10,49 +10,17 @@ import { cn } from "~/lib/utils";
 import { EditorProvider } from "~/providers/editor.provider";
 import { getPage } from "~/services/page.service";
 import { createLogger } from "~/utils/logger";
-import { tryCatch } from "~/utils/tryCatch";
 
 const logger = createLogger("$PageId Route");
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { workspace, page: pageId } = params;
+  logger.debug({ pageId }, "Loading page");
 
-  const { result, error } = await tryCatch(
-    getPage(pageId as string, workspace as string)
-  );
-
-  if (error) {
-    logger.error(error);
-  }
-
-  if (!result) {
-    throw redirect("/home");
-  }
-
-  return { data: result };
+  return { data$: getPage(pageId as string, workspace as string) };
 }
 
-const EditorSkeleton = ({ children }: React.PropsWithChildren) => {
-  const navigation = useNavigation();
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    let timeout = -1;
-    if (navigation.state === "loading") {
-      timeout = window.setTimeout(() => setLoading(true), 200);
-    } else {
-      setLoading(false);
-    }
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [navigation]);
-
-  if (!loading) {
-    return <>{children}</>;
-  }
-
+const EditorSkeleton = () => {
   return (
     <div
       className={cn(
@@ -67,33 +35,39 @@ const EditorSkeleton = ({ children }: React.PropsWithChildren) => {
 };
 
 export default function WorkspacePage() {
-  const { data } = useLoaderData<typeof loader>();
+  const { data$ } = useLoaderData<typeof loader>();
 
   return (
-    <EditorProvider initialValue={data}>
-      <EditorSkeleton>
-        {data.archivedOn && (
-          <Alert
-            className="sticky z-20 bg-red-950 border-none rounded-none text-white flex justify-between items-center p-1 px-4"
-            variant={"destructive"}
-          >
-            This page is archived
-            <SelectParent
-              page={{ data: data, index: data.id }}
-              renderTriggerButton={() => (
-                <Button
-                  className="text-green-500 font-medium"
-                  variant={"outline"}
-                  size={"sm"}
+    <Suspense fallback={<EditorSkeleton />}>
+      <Await resolve={data$}>
+        {(data) =>
+          data && (
+            <EditorProvider initialValue={data}>
+              {data.archivedOn && (
+                <Alert
+                  className="sticky z-20 bg-red-950 border-none rounded-none text-white flex justify-between items-center p-1 px-4"
+                  variant={"destructive"}
                 >
-                  Unarchived
-                </Button>
+                  This page is archived
+                  <SelectParent
+                    page={{ data: data, index: data.id }}
+                    renderTriggerButton={() => (
+                      <Button
+                        className="text-green-500 font-medium"
+                        variant={"outline"}
+                        size={"sm"}
+                      >
+                        Unarchived
+                      </Button>
+                    )}
+                  ></SelectParent>
+                </Alert>
               )}
-            ></SelectParent>
-          </Alert>
-        )}
-        <Editor className="transition-[display] duration-200 delay-200 " />
-      </EditorSkeleton>
-    </EditorProvider>
+              <Editor className="transition-[display] duration-200 delay-200 " />
+            </EditorProvider>
+          )
+        }
+      </Await>
+    </Suspense>
   );
 }

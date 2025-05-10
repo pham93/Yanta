@@ -103,7 +103,7 @@ export function addTreeItem(
 
 export function createDefaultRoot() {
   return {
-    data: "",
+    data: {},
     index: "root",
     children: [],
   };

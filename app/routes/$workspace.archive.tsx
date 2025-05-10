@@ -25,7 +25,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
   const pages = workspace.pages;
 
   const { newTree, removedItems } = removeTreeItem(
-    { index: payload.pageId, data: "" },
+    { index: payload.pageId, data: {} },
     archivedPages
   );
   const ids = uniqueUuidArraySchema.parse(Object.keys(removedItems));
